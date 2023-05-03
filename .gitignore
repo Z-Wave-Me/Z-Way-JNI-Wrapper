@@ -1,0 +1,17 @@
+# C
+*.o
+*.so
+
+# Java
+*.class
+
+# Z-Way specific folders
+libs
+libzway
+ZDDX
+config
+translation
+
+# Editors
+.idea
+*~
