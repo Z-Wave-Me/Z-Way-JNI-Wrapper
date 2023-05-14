@@ -19,9 +19,9 @@
     JNI_THROW_EXCEPTION_INTERNAL(); \
     return (ret);
 
-// to do: use an appropriate callback for java - terminator_callback
-// to do: stdout (logger)
-// to do: add loglevel
+// TODO: use an appropriate callback for java - terminator_callback
+// TODO: stdout (logger)
+// TODO: add loglevel
 static jlong jni_zway_init(JNIEnv *env, jobject obj, jstring name, jstring port, jint speed, jstring config_folder, jstring translations_folder, jstring zddx_folder, jlong ternminator_callback) {
     (void)obj;
     (void)env;
