@@ -5,6 +5,10 @@
 # Java
 *.class
 
+# Output files
+out
+libjzway/*
+
 # Z-Way specific folders
 libs
 libzway
