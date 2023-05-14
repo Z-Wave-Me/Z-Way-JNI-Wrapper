@@ -7,12 +7,16 @@
 
 #define JNIT_CLASS "ZWay"
 
-#define JNI_THROW_EXCEPTION() \
+#define JNI_THROW_EXCEPTION_INTERNAL() \
     jclass Exception = (*env)->FindClass(env, "java/lang/Exception"); \
-    (*env)->ThrowNew(env, Exception, zstrerror(err));
+    (*env)->ThrowNew(env, Exception, zstrerror(err)); \
+
+#define JNI_THROW_EXCEPTION() \
+    JNI_THROW_EXCEPTION_INTERNAL(); \
+    return;
 
 #define JNI_THROW_EXCEPTION_RET(ret) \
-    JNI_THROW_EXCEPTION(); \
+    JNI_THROW_EXCEPTION_INTERNAL(); \
     return (ret);
 
 // to do: use an appropriate callback for java - terminator_callback
@@ -100,100 +104,89 @@ static void jni_removeNodeFromNetwork(JNIEnv *env, jobject obj, jlong ptr, jbool
     }
 }
 
-/*static void jni_controllerChange(JNIEnv *env, jobject obj, jlong ptr, jboolean startStop) {
-    (void)obj;
-    (void)env;
-    
-    ZWay zway = (ZWay) ptr;
-
-    ZWError err = zway_controller_change(zway, startStop);
-    
-    if (err != NoError) {
-        JNI_THROW_EXCEPTION();
-    }
-}
-
-static void jni_getSUCNodeId(JNIEnv *env, jobject obj, jlong ptr) {
-    (void)obj;
-    (void)env;
-    
-    ZWay zway = (ZWay) ptr;
-
-    ZWError err = zway_fc_get_suc_node_id(zway, NULL, NULL, NULL);
-    
-    if (err != NoError) {
-        JNI_THROW_EXCEPTION();
-    }
-}
-
-static void jni_setSUCNodeId(JNIEnv *env, jobject obj, jlong ptr, jint node_id) {
-    (void)obj;
-    (void)env;
-    
-    ZWay zway = (ZWay) ptr;
-
-    ZWError err = zway_controller_set_suc_node_id(zway, node_id);
-    
-    if (err != NoError) {
-        JNI_THROW_EXCEPTION();
-    }
-}
-
-static void jni_setSISNodeId(JNIEnv *env, jobject obj, jlong ptr, jint node_id) {
-    (void)obj;
-    (void)env;
-    
-    ZWay zway = (ZWay) ptr;
-
-    ZWError err = zway_controller_set_sis_node_id(zway, node_id);
-    
-    if (err != NoError) {
-        JNI_THROW_EXCEPTION();
-    }
-}
-
-static void jni_disableSUCNodeId(JNIEnv *env, jobject obj, jlong ptr, jint node_id) {
-    (void)obj;
-    (void)env;
-    
-    ZWay zway = (ZWay) ptr;
-
-    ZWError err = zway_controller_disable_suc_node_id(zway, node_id);
-    
-    if (err != NoError) {
-        JNI_THROW_EXCEPTION();
-    }
-}
-
 static void jni_setDefault(JNIEnv *env, jobject obj, jlong ptr) {
     (void)obj;
     (void)env;
-    
+
     ZWay zway = (ZWay) ptr;
 
     ZWError err = zway_controller_set_default(zway);
-    
+
     if (err != NoError) {
         JNI_THROW_EXCEPTION();
     }
 }
-*/
+
+static jboolean jni_isRunning(JNIEnv *env, jobject obj, jlong ptr) {
+    (void)obj;
+    (void)env;
+
+    ZWay zway = (ZWay) ptr;
+
+    jboolean ret = zway_is_running(zway);
+
+    return ret;
+}
+
+typedef struct jni_callback_data {
+    JNIEnv *env;
+    jobject obj;
+    jmethodID method;
+    jobject arg;
+} jni_callback_data;
+
+// Callback stub
+// TODO(change type to ZJobCustomCallback and fix warning from GCC)
+static void callback_stub(const ZWay zway, ZWBYTE funcId, void *arg) {
+    (void)funcId;
+
+    printf("Callback\n");
+    jni_callback_data *cbkData = (jni_callback_data *) arg;
+
+    printf("%p %p %p\n", (cbkData->env), (cbkData->obj), cbkData->method);
+
+    (*(cbkData->env))->CallVoidMethod(cbkData->env, cbkData->obj, cbkData->method); //, cbkData->arg
+
+    free(arg);
+}
+
+// TODO callbackArg
+static void jni_cc_switchBinarySet(JNIEnv *env, jobject obj, jlong ptr, jint deviceId, jint instanceId, jboolean value, jint duration, jlong successCallback, jlong failureCallback, jlong callbackArg) {
+    ZWay zway = (ZWay) ptr;
+
+    jclass cls = (*env)->GetObjectClass(env, obj);
+    jmethodID mid = (*env)->GetMethodID(env, cls, "callbackStub", "()V");
+    if (mid == 0) {
+        printf("mid = 0\n");
+        ZWError err = InvalidArg;
+        JNI_THROW_EXCEPTION();
+    }
+    jni_callback_data *cbkData = malloc(sizeof(jni_callback_data));
+    cbkData->env = env;
+    cbkData->obj = obj;
+    cbkData->method = mid;
+
+    (*(cbkData->env))->CallVoidMethod(cbkData->env, cbkData->obj, cbkData->method);
+
+    printf("%p %p %p\n", env, obj, mid);
+    ZWError err = zway_cc_switch_binary_set(zway, deviceId, instanceId, value, duration, (ZJobCustomCallback) callback_stub, (ZJobCustomCallback) failureCallback, (void*)cbkData);
+    if (err != NoError) {
+        free(cbkData);
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+// TODO add switch binary set
 
 static JNINativeMethod funcs[] = {
 	{ "jni_zway_init", "(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;J)J", (void *)&jni_zway_init },
 	{ "jni_discover", "(J)V", (void *)&jni_discover },
 	{ "jni_addNodeToNetwork", "(JZ)V", (void *)&jni_addNodeToNetwork },
-	{ "jni_removeNodeFromNetwork", "(JZ)V", (void *)&jni_removeNodeFromNetwork }
-	/*{ "jni_controllerChange", "(JI)V", (void *)&c_subtract },
-	{ "jni_getSUCNodeId", "(J)V", (void *)&c_increment },
-	{ "jni_setSUCNodeId", "(J)V", (void *)&c_decrement },
-	{ "jni_setSISNodeId", "(J)I", (void *)&c_getval },
-	{ "jni_setDefault", "(J)Ljava/lang/String;", (void *)&c_toString }*/
+	{ "jni_removeNodeFromNetwork", "(JZ)V", (void *)&jni_removeNodeFromNetwork },
+	{ "jni_setDefault", "(J)V", (void *)&jni_setDefault },
+	{ "jni_cc_switchBinarySet", "(JIIZIJJJ)V", (void *)&jni_cc_switchBinarySet },
+	{ "jni_isRunning", "(J)Z", (void *)&jni_isRunning }
 };
-
-JNIEXPORT void JNICALL Java_java_lang_Object_registerNatives(JNIEnv *env, jclass cls) {
-    printf("%i\n", (*env)->RegisterNatives(env, cls, funcs, sizeof(funcs)/sizeof(funcs[0])));
-}
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
 	JNIEnv *env;
@@ -210,9 +203,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
 		return -1;
 
 	reg_res = (*env)->RegisterNatives(env, cls, funcs, sizeof(funcs)/sizeof(funcs[0]));
-	//Java_java_lang_Object_registerNatives(env, cls);
 
-	printf("Register > %i\n", reg_res);
 
 	if (reg_res != 0)
 		return -1;
