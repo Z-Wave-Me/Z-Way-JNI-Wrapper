@@ -23,7 +23,7 @@ INCLUDES = -I$(ZWAY_INC_DIR) $(JNI_INCLUDES)
 LIBDIR = -L$(ZWAY_LIB_DIR)
 LIBS += $(patsubst %,-l%,$(ZWAY_LIBS))
 
-CFLAGS += -Wall
+CFLAGS += -Wall -Werror
 
 LDFLAGS += -shared
 LIBS += -lpthread -lxml2 -lz -lm -lcrypto -larchive
