@@ -129,8 +129,8 @@ static jboolean jni_isRunning(JNIEnv *env, jobject obj, jlong ptr) {
 }
 
 typedef struct jni_callback_data {
-    JNIEnv *env;
-    jobject obj;
+    JavaVM *jvm;
+    jobject cls;
     jmethodID method;
     jobject arg;
 } jni_callback_data;
@@ -142,7 +142,10 @@ static void callback_stub(const ZWay zway, ZWBYTE funcId, void *arg) {
 
     jni_callback_data *cbkData = (jni_callback_data *) arg;
 
-    (*(cbkData->env))->CallVoidMethod(cbkData->env, cbkData->obj, cbkData->method); //, cbkData->arg
+    JNIEnv* env;
+    (*(cbkData->jvm))->AttachCurrentThread(cbkData->jvm, (void**) &env, NULL);
+    (*env)->CallVoidMethod(env, cbkData->cls, cbkData->method); //, cbkData->arg
+    (*(cbkData->jvm))->DetachCurrentThread(cbkData->jvm);  
 
     free(arg);
 }
@@ -151,7 +154,7 @@ static void callback_stub(const ZWay zway, ZWBYTE funcId, void *arg) {
 static void jni_cc_switchBinarySet(JNIEnv *env, jobject obj, jlong ptr, jint deviceId, jint instanceId, jboolean value, jint duration, jlong successCallback, jlong failureCallback, jlong callbackArg) {
     ZWay zway = (ZWay) ptr;
 
-    jclass cls = (*env)->GetObjectClass(env, obj);
+    jclass cls = (*env)->FindClass(env, JNIT_CLASS);
     jmethodID mid = (*env)->GetMethodID(env, cls, "callbackStub", "()V");
     if (mid == 0) {
         zway_log(zway, Critical, ZSTR("Callback method not found"));
@@ -160,8 +163,9 @@ static void jni_cc_switchBinarySet(JNIEnv *env, jobject obj, jlong ptr, jint dev
     }
     
     jni_callback_data *cbkData = malloc(sizeof(jni_callback_data));
-    cbkData->env = env;
-    cbkData->obj = obj;
+    (*env)->GetJavaVM(env, &(cbkData->jvm));
+    //cbkData->env = env;
+    cbkData->cls = cls;
     cbkData->method = mid;
 
     ZWError err = zway_cc_switch_binary_set(zway, deviceId, instanceId, value, duration, (ZJobCustomCallback) callback_stub, (ZJobCustomCallback) failureCallback, (void*)cbkData);
