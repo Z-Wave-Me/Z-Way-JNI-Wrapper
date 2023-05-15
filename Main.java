@@ -3,7 +3,7 @@ class Main {
         ZWay zway;
         try {
             System.out.println("init zway");
-            zway = new ZWay("zway", "/dev/ttyACM1", 115200, "z-way-root/config", "z-way-root/translations", "z-way-root/ZDDX", 0);
+            zway = new ZWay("zway", "/dev/ttyACM0", 115200, "z-way-root/config", "z-way-root/translations", "z-way-root/ZDDX", 0);
         } catch (java.lang.Exception e) {
             System.out.println(e);
             throw new RuntimeException();

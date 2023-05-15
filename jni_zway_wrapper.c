@@ -140,10 +140,7 @@ typedef struct jni_callback_data {
 static void callback_stub(const ZWay zway, ZWBYTE funcId, void *arg) {
     (void)funcId;
 
-    printf("Callback\n");
     jni_callback_data *cbkData = (jni_callback_data *) arg;
-
-    printf("%p %p %p\n", (cbkData->env), (cbkData->obj), cbkData->method);
 
     (*(cbkData->env))->CallVoidMethod(cbkData->env, cbkData->obj, cbkData->method); //, cbkData->arg
 
@@ -157,18 +154,16 @@ static void jni_cc_switchBinarySet(JNIEnv *env, jobject obj, jlong ptr, jint dev
     jclass cls = (*env)->GetObjectClass(env, obj);
     jmethodID mid = (*env)->GetMethodID(env, cls, "callbackStub", "()V");
     if (mid == 0) {
-        printf("mid = 0\n");
+        zway_log(zway, Critical, ZSTR("Callback method not found"));
         ZWError err = InvalidArg;
         JNI_THROW_EXCEPTION();
     }
+    
     jni_callback_data *cbkData = malloc(sizeof(jni_callback_data));
     cbkData->env = env;
     cbkData->obj = obj;
     cbkData->method = mid;
 
-    (*(cbkData->env))->CallVoidMethod(cbkData->env, cbkData->obj, cbkData->method);
-
-    printf("%p %p %p\n", env, obj, mid);
     ZWError err = zway_cc_switch_binary_set(zway, deviceId, instanceId, value, duration, (ZJobCustomCallback) callback_stub, (ZJobCustomCallback) failureCallback, (void*)cbkData);
     if (err != NoError) {
         free(cbkData);
