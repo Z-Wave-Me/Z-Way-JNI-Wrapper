@@ -1,5 +1,5 @@
 class Main {
-    public static void main(String args[]) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
         ZWay zway;
         try {
             System.out.println("init zway");
