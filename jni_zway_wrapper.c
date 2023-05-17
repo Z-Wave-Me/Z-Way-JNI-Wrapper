@@ -81,7 +81,7 @@ static void jni_discover(JNIEnv *env, jobject obj, jlong ptr) {
     }
 }
 
-static void jni_addNodeToNetwork(JNIEnv *env, jobject obj, jlong ptr, jboolean startStop) {
+static void jni_add_node_to_network(JNIEnv *env, jobject obj, jlong ptr, jboolean startStop) {
     (void)obj;
     (void)env;
 
@@ -94,7 +94,7 @@ static void jni_addNodeToNetwork(JNIEnv *env, jobject obj, jlong ptr, jboolean s
     }
 }
 
-static void jni_removeNodeFromNetwork(JNIEnv *env, jobject obj, jlong ptr, jboolean startStop) {
+static void jni_remove_node_from_network(JNIEnv *env, jobject obj, jlong ptr, jboolean startStop) {
     (void)obj;
     (void)env;
     
@@ -107,7 +107,7 @@ static void jni_removeNodeFromNetwork(JNIEnv *env, jobject obj, jlong ptr, jbool
     }
 }
 
-static void jni_setDefault(JNIEnv *env, jobject obj, jlong ptr) {
+static void jni_set_default(JNIEnv *env, jobject obj, jlong ptr) {
     (void)obj;
     (void)env;
 
@@ -120,7 +120,7 @@ static void jni_setDefault(JNIEnv *env, jobject obj, jlong ptr) {
     }
 }
 
-static jboolean jni_isRunning(JNIEnv *env, jobject obj, jlong ptr) {
+static jboolean jni_is_running(JNIEnv *env, jobject obj, jlong ptr) {
     (void)obj;
     (void)env;
 
@@ -155,7 +155,7 @@ static void callback_stub(const ZWay zway, ZWBYTE funcId, void *arg) {
 }
 
 // TODO callbackArg
-static void jni_cc_switchBinarySet(JNIEnv *env, jobject obj, jlong ptr, jint deviceId, jint instanceId, jboolean value, jint duration, jlong successCallback, jlong failureCallback, jlong callbackArg) {
+static void jni_cc_switch_binary_set(JNIEnv *env, jobject obj, jlong ptr, jint deviceId, jint instanceId, jboolean value, jint duration, jlong successCallback, jlong failureCallback, jlong callbackArg) {
     ZWay zway = (ZWay) ptr;
 
     jclass cls = (*env)->FindClass(env, JNIT_CLASS);
@@ -182,14 +182,14 @@ static void jni_cc_switchBinarySet(JNIEnv *env, jobject obj, jlong ptr, jint dev
 // END AUTOMATED CODE: CC FUNCTIONS
 
 static JNINativeMethod funcs[] = {
-	{ "jni_zway_init", "(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;J)J", (void *)&jni_zway_init },
+	{ "jni_zwayInit", "(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;J)J", (void *)&jni_zway_init },
 	{ "jni_discover", "(J)V", (void *)&jni_discover },
-	{ "jni_addNodeToNetwork", "(JZ)V", (void *)&jni_addNodeToNetwork },
-	{ "jni_removeNodeFromNetwork", "(JZ)V", (void *)&jni_removeNodeFromNetwork },
-	{ "jni_setDefault", "(J)V", (void *)&jni_setDefault },
-	{ "jni_isRunning", "(J)Z", (void *)&jni_isRunning },
+	{ "jni_addNodeToNetwork", "(JZ)V", (void *)&jni_add_node_to_network },
+	{ "jni_removeNodeFromNetwork", "(JZ)V", (void *)&jni_remove_node_from_network },
+	{ "jni_setDefault", "(J)V", (void *)&jni_set_default },
+	{ "jni_isRunning", "(J)Z", (void *)&jni_is_running },
 	// BEGIN AUTOMATED CODE: CC FUNCTIONS SIGNATURE
-	{ "jni_cc_switchBinarySet", "(JIIZIJJJ)V", (void *)&jni_cc_switchBinarySet }
+	{ "jni_cc_switchBinarySet", "(JIIZIJJJ)V", (void *)&jni_cc_switch_binary_set } //,
 	// END AUTOMATED CODE: CC FUNCTIONS SIGNATURE
 };
 

@@ -6,7 +6,7 @@ public class ZWay {
     }
 
     public ZWay(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder, long ternminator_callback) {
-        zway = jni_zway_init(name, port, speed, config_folder, translations_folder, zddx_folder, ternminator_callback);
+        zway = jni_zwayInit(name, port, speed, config_folder, translations_folder, zddx_folder, ternminator_callback);
     }
 
     public void discover() {
@@ -38,12 +38,12 @@ public class ZWay {
     }
 
     // JNI functions
-    private native long jni_zway_init(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder, long ternminator_callback);
+    private native long jni_zwayInit(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder, long ternminator_callback);
     private native void jni_discover(long ptr);
+    private native boolean jni_isRunning(long ptr);
     private native void jni_addNodeToNetwork(long ptr, boolean startStop);
     private native void jni_removeNodeFromNetwork(long ptr, boolean startStop);
     private native void jni_setDefault(long ptr);
-    private native boolean jni_isRunning(long ptr);
     private native void jni_cc_switchBinarySet(long ptr, int deviceId, int instanceId, boolean value, int duration, long successCallback, long failureCallback, long callbackArg);
     // added for terminator callback
 }
