@@ -26,6 +26,8 @@ static jlong jni_zway_init(JNIEnv *env, jobject obj, jstring name, jstring port,
     (void)obj;
     (void)env;
 
+    // Config folders
+
     const char *str_name;
     const char *str_port;
     const char *str_config_folder;
@@ -40,10 +42,11 @@ static jlong jni_zway_init(JNIEnv *env, jobject obj, jstring name, jstring port,
 
     ZWLog logger = zlog_create_syslog(Debug);
 
+    // Init Z-Way
+
     ZWay zway = NULL;
 
     ZWError err = zway_init(&zway, str_port, (speed_t)speed, str_config_folder, str_translations_folder, str_zddx_folder, str_name, logger);
-
     if (err != NoError) {
         JNI_THROW_EXCEPTION_RET(0);
     }
@@ -128,6 +131,8 @@ static jboolean jni_isRunning(JNIEnv *env, jobject obj, jlong ptr) {
     return ret;
 }
 
+// Callback stubs
+
 typedef struct jni_callback_data {
     JavaVM *jvm;
     jobject cls;
@@ -135,7 +140,6 @@ typedef struct jni_callback_data {
     jobject arg;
 } jni_callback_data;
 
-// Callback stub
 // TODO(change type to ZJobCustomCallback and fix warning from GCC)
 static void callback_stub(const ZWay zway, ZWBYTE funcId, void *arg) {
     (void)funcId;
@@ -168,14 +172,14 @@ static void jni_cc_switchBinarySet(JNIEnv *env, jobject obj, jlong ptr, jint dev
     cbkData->cls = cls;
     cbkData->method = mid;
 
+// BEGIN AUTOMATED CODE: CC FUNCTIONS
     ZWError err = zway_cc_switch_binary_set(zway, deviceId, instanceId, value, duration, (ZJobCustomCallback) callback_stub, (ZJobCustomCallback) failureCallback, (void*)cbkData);
     if (err != NoError) {
         free(cbkData);
         JNI_THROW_EXCEPTION();
     }
 }
-
-// TODO add switch binary set
+// END AUTOMATED CODE: CC FUNCTIONS
 
 static JNINativeMethod funcs[] = {
 	{ "jni_zway_init", "(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;J)J", (void *)&jni_zway_init },
@@ -183,8 +187,10 @@ static JNINativeMethod funcs[] = {
 	{ "jni_addNodeToNetwork", "(JZ)V", (void *)&jni_addNodeToNetwork },
 	{ "jni_removeNodeFromNetwork", "(JZ)V", (void *)&jni_removeNodeFromNetwork },
 	{ "jni_setDefault", "(J)V", (void *)&jni_setDefault },
-	{ "jni_cc_switchBinarySet", "(JIIZIJJJ)V", (void *)&jni_cc_switchBinarySet },
-	{ "jni_isRunning", "(J)Z", (void *)&jni_isRunning }
+	{ "jni_isRunning", "(J)Z", (void *)&jni_isRunning },
+	// BEGIN AUTOMATED CODE: CC FUNCTIONS SIGNATURE
+	{ "jni_cc_switchBinarySet", "(JIIZIJJJ)V", (void *)&jni_cc_switchBinarySet }
+	// END AUTOMATED CODE: CC FUNCTIONS SIGNATURE
 };
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
@@ -202,7 +208,6 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
 		return -1;
 
 	reg_res = (*env)->RegisterNatives(env, cls, funcs, sizeof(funcs)/sizeof(funcs[0]));
-
 	if (reg_res != 0)
 		return -1;
 
