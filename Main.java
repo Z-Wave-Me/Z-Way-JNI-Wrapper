@@ -17,16 +17,19 @@ class Main {
         }
 
         Thread.sleep(1000);
-        //zway.setDefault();
-        //zway.addNodeToNetwork(true);
-        //zway.removeNodeFromNetwork(true);
+        //zway.controller.setDefault();
+        //zway.controller.addNodeToNetwork(true);
+        //zway.controller.removeNodeFromNetwork(true);
+
 
         boolean s = false;
         while (zway.isRunning()) {
             Thread.sleep(1000);
             try {
                 System.out.println("switch");
-                zway.cc_switchBinarySet(2, 0, s, 0, 0, 0, 0);
+                //zway.devices[2].instances[0].switchbinary(2, 0, s, 0, 0, 0, 0);
+                ((ZWay.Device.Instance.SwitchBinary) zway.devices.get(2).instances.get(0).commandsByName.get("switchBinary")).set(s);
+                //zway.switchBinary(2, 0).set(s);
             } catch (java.lang.Exception e) {
                 System.out.println(e);
             }
