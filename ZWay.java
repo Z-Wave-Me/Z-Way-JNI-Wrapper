@@ -64,6 +64,277 @@ public final class ZWay {
     private native void jni_removeNodeFromNetwork(long ptr, boolean startStop);
     private native void jni_setDefault(long ptr);
     private native void jni_cc_switchBinarySet(long ptr, int deviceId, int instanceId, boolean value, int duration, long successCallback, long failureCallback, long callbackArg);
+    private native long jni_zdataFind(long dh, String path, long jzway);
+    private native long jni_zdataControllerFind(String path, long jzway);
+    private native long jni_zdataDeviceFind(String path, int deviceId, long jzway);
+    private native long jni_zdataInstanceFind(String path, int deviceId, int instanceId, long jzway);
+    private native long jni_zdataCommandFind(String path, int deviceId, int instanceId, int commandId, long jzway);
+    private native void jni_zdataAddCallbackEx(long dh);
+    private native void jni_zdataRemoveCallbackEx(long dh);
+    private native String jni_zdataGetName(long data);
+    private native int jni_zdataGetType(long dh);
+    private native boolean jni_zdataGetBoolean(long dh);
+    private native int jni_zdataGetInteger(long dh);
+    private native float jni_zdataGetFloat(long dh);
+    private native String jni_zdataGetString(long dh);
+    private native int[] jni_zdataGetBinary(long dh);
+    private native int[] jni_zdataGetIntArray(long dh);
+    private native float[] jni_zdataGetFloatArray(long dh);
+    private native String[] jni_zdataGetStringArray(long dh);
+
+    protected final class Data {
+        private static final int phantomUpdate = 0x40;
+        private static final int childEvent = 0x80;
+        private static final int updated = 0x01;
+        private static final int invalidated = 0x02;
+        private static final int deleted = 0x03;
+        private static final int childCreated = 0x04;
+
+        private Object value;
+        // is equal to Integer.class when is null
+        private Type valueType;
+        // is equal to "Integer" when is null
+        private String valueTypeStr;
+
+        private long dh;
+
+        private final String name;
+
+        private final String path; // TODO ask if it can be final
+
+        // if true, get value from JNI every update callback, otherwise get value from JNI every time a "get" function is called.
+        private Boolean monitored;
+
+        private Boolean isAlive;
+
+        public Data(String path, long dhParent, Boolean monitored, long jzway) {
+            this.path = path;
+            this.monitored = monitored;
+            dh = jni_zdataFind(dhParent, path, jzway);
+            name = jni_zdataGetName(dh);
+            jni_zdataAddCallbackEx(dh);
+        }
+
+        public Data(String path, boolean monitored, long jzway) {
+            this.path = path;
+            this.monitored = monitored;
+            dh = jni_zdataControllerFind(path, jzway);
+            name = jni_zdataGetName(dh);
+            jni_zdataAddCallbackEx(dh);
+        }
+
+        public Data(String path, int deviceId, boolean monitored, long jzway) {
+            this.path = path;
+            this.monitored = monitored;
+            dh = jni_zdataDeviceFind(path, deviceId, jzway);
+            name = jni_zdataGetName(dh);
+            jni_zdataAddCallbackEx(dh);
+        }
+
+        public Data(String path, int deviceId, int instanceId, boolean monitored, long jzway) {
+            this.path = path;
+            this.monitored = monitored;
+            dh = jni_zdataInstanceFind(path, deviceId, instanceId, jzway);
+            name = jni_zdataGetName(dh);
+            jni_zdataAddCallbackEx(dh);
+        }
+
+        public Data(String path, int deviceId, int instanceId, int commandId, boolean monitored, long jzway) {
+            this.path = path;
+            this.monitored = monitored;
+            dh = jni_zdataCommandFind(path, deviceId, instanceId, commandId, jzway);
+            name = jni_zdataGetName(dh);
+            jni_zdataAddCallbackEx(dh);
+        }
+
+        /* @Override TODO replace finalizer with something else
+        protected void finalize() throws Throwable {
+            jni_zdataRemoveCallbackEx(dh);
+        }*/
+
+        private void dataCallback(int eventType, Object obj) throws Exception {
+            // get type of the event
+            boolean isPhantom = (phantomUpdate & eventType) > 0;
+            boolean isChild = (childEvent & eventType) > 0;
+            eventType = eventType & (~phantomUpdate) & (~childEvent);
+            // TODO check monitored
+            if (eventType == updated) {
+                int dataType = jni_zdataGetType(dh);
+                if (dataType == 1) {
+                    valueType = Boolean.class;
+                    valueTypeStr = "Boolean";
+                    value = jni_zdataGetBoolean(dh);
+                } else if (dataType == 2) {
+                    valueType = Integer.class;
+                    valueTypeStr = "Integer";
+                    value = jni_zdataGetInteger(dh);
+                } else if (dataType == 3) {
+                    valueType = Float.class;
+                    valueTypeStr = "Float";
+                    value = jni_zdataGetFloat(dh);
+                } else if (dataType == 4) {
+                    valueType = String.class;
+                    valueTypeStr = "String";
+                    value = jni_zdataGetString(dh);
+                } else if (dataType == 5) {
+                    valueType = Byte[].class;
+                    valueTypeStr = "Byte[]";
+                    value = jni_zdataGetBinary(dh);
+                } else if (dataType == 6) {
+                    valueType = Integer[].class;
+                    valueTypeStr = "Integer[]";
+                    value = jni_zdataGetIntArray(dh);
+                } else if (dataType == 7) {
+                    valueType = Float[].class;
+                    valueTypeStr = "Float[]";
+                    value = jni_zdataGetFloatArray(dh);
+                } else if (dataType == 8) {
+                    valueType = String[].class;
+                    valueTypeStr = "String[]";
+                    value = jni_zdataGetStringArray(dh);
+                } else if (dataType == 0) {
+                    valueType = Integer.class;
+                    valueTypeStr = "Integer";
+                    value = null;
+                } else {
+                    throw new Exception("Type of the value in data holder is an invalid integer.");
+                }
+            } else if (eventType == invalidated) {
+                // do later
+            } else if (eventType == deleted) {
+                // do later
+            } else if (eventType == childCreated) {
+                // do later
+            } else {
+                throw new Exception("Type of the event is an invalid integer.");
+            }
+        }
+
+
+        public Type getValueType() {
+            return valueType;
+        }
+
+        public String getValueTypeStr() {
+            return valueTypeStr;
+        }
+
+        public Boolean isMonitored() {
+            return monitored;
+        }
+
+        public void setBool(Boolean data) {
+            value = data;
+            valueType = Boolean.class;
+            valueTypeStr = "Boolean";
+        }
+
+        public void setInt(Integer data) {
+            value = data;
+            valueType = Integer.class;
+            valueTypeStr = "Integer";
+        }
+
+        public void setFloat(Float data) {
+            value = data;
+            valueType = Float.class;
+            valueTypeStr = "Float";
+        }
+
+        public void setString(String data) {
+            value = data;
+            valueType = String.class;
+            valueTypeStr = "String";
+        }
+
+        public void setByteList(Integer[] data) {
+            value = data;
+            valueType = Byte[].class;
+            valueTypeStr = "Byte[]";
+        }
+
+        public void setIntList(Integer[] data) {
+            value = data;
+            valueType = Integer[].class;
+            valueTypeStr = "Integer[]";
+        }
+
+        public void setFloatList(Float[] data) {
+            value = data;
+            valueType = Float[].class;
+            valueTypeStr = "Float[]";
+        }
+
+        public void setStringList(String[] data) {
+            value = data;
+            valueType = String[].class;
+            valueTypeStr = "String[]";
+        }
+
+        public Boolean getBool() {
+            if (valueType == Boolean.class && valueTypeStr.equals("Boolean")) {
+                return (Boolean) value;
+            } else {
+                throw new ClassCastException("Illegal call: value is not Boolean");
+            }
+        }
+
+        public Integer getInt() {
+            if (valueType == Integer.class && valueTypeStr.equals("Integer")) {
+                return (Integer) value;
+            } else {
+                throw new ClassCastException("Illegal call: value is not Integer");
+            }
+        }
+
+        public Float getFloat() {
+            if (valueType == Float.class && valueTypeStr.equals("Float")) {
+                return (Float) value;
+            } else {
+                throw new ClassCastException("Illegal call: value is not Float");
+            }
+        }
+
+        public String getString() {
+            if (valueType == String.class && valueTypeStr.equals("String")) {
+                return (String) value;
+            } else {
+                throw new ClassCastException("Illegal call: value is not String");
+            }
+        }
+
+        public Integer[] getByteList() {
+            if (valueType == Byte[].class && valueTypeStr.equals("Byte[]")) {
+                return (Integer[]) value;
+            } else {
+                throw new ClassCastException("Illegal call: value is not Integer[]");
+            }
+        }
+
+        public Integer[] getIntList() {
+            if (valueType == Integer[].class && valueTypeStr.equals("Integer[]")) {
+                return (Integer[]) value;
+            } else {
+                throw new ClassCastException("Illegal call: value is not Integer[]");
+            }
+        }
+
+        public Float[] getFloatList() {
+            if (valueType == Float[].class && valueTypeStr.equals("Float[]")) {
+                return (Float[]) value;
+            } else {
+                throw new ClassCastException("Illegal call: value is not Float[]");
+            }
+        }
+
+        public String[] getStringList() {
+            if (valueType == String[].class && valueTypeStr.equals("String[]")) {
+                return (String[]) value;
+            } else {
+                throw new ClassCastException("Illegal call: value is not String[]");
+            }
+        }
+    }
 
     protected final class Controller {
         private final long jzway;
@@ -121,8 +392,11 @@ public final class ZWay {
 
             // BEGIN AUTOGENERATED CODE: CC CLASSES
             protected final class SwitchBinary extends Command {
-                public SwitchBinary(ZWay zWay) {
+                protected final Integer id;
+
+                public SwitchBinary(ZWay zWay, Integer id) {
                     super(zWay);
+                    this.id = id;
                 }
 
                 public void set(boolean s) {
