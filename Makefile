@@ -43,6 +43,7 @@ $(TARGET_SO): $(C_OBJECTS)
 
 clean:
 	rm -f *.o *.class $(TARGET_SO) $(TARGET_DIR)/*
+	python2 autogenerate_code.py clean
 
 copy:
 	cp $(patsubst %,$(ZWAY_LIB_DIR)/lib%.so,$(ZWAY_LIBS)) $(TARGET_DIR)
