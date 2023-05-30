@@ -134,9 +134,9 @@ def GetParamJavaDeclaration(param):
         elif type == 'unsigned short' or type == 'unsigned short int' or type == 'unsigned int' or type == 'int' or type == 'speed_t' or type == 'ZWBYTE' or type == 'ZWNODE':
                 jtype = 'int'
         elif type == 'const ZWBYTE *' or type == 'ZWBYTE *':
-                jtype = 'long' # ???
+                jtype = 'long' # TODO
         elif type == 'const ZWNODE *' or type == 'ZWNODE *':
-                jtype = 'long' # ???
+                jtype = 'long' # TODO
         elif type == 'ZWCSTR':
                 jtype = 'string'
         elif type == 'float':
@@ -156,9 +156,9 @@ def GetParamSignature(param):
         if type == 'unsigned short' or type == 'unsigned short int' or type == 'unsigned int' or type == 'int' or type == 'speed_t' or type == 'ZWBYTE' or type == 'ZWNODE':
                 return 'I'
         if type == 'const ZWBYTE *' or type == 'ZWBYTE *':
-                return '?'
+                return '?' # TODO
         if type == 'const ZWNODE *' or type == 'ZWNODE *':
-                return '?'
+                return '?' # TODO
         if type == 'ZWCSTR':
                 return 'Ljava/lang/String;'
         if type == 'float':
@@ -248,9 +248,9 @@ def ParseCC():
 
                         paramsDescriptions.pop(0)  # remove node_id and instance_id from params list
                         paramsDescriptions.pop(0)  # the list is in fact Param() object, so we can not reassign it
-                        paramsDescriptions.pop(-1) # remove successCallback, failureCallback, callbackArg too
-                        paramsDescriptions.pop(-1)
-                        paramsDescriptions.pop(-1)
+                        paramsDescriptions.pop(-1) # remove successCallback
+                        paramsDescriptions.pop(-1) # failureCallback and
+                        paramsDescriptions.pop(-1) # callbackArg
                         paramsC = paramsC[2:-3]
 
                         for p in paramsC:
@@ -260,7 +260,7 @@ def ParseCC():
                                 raise ValueError("%s: Can not match parameter %s in [%s]" % (funcCName, p[1], ', '.join(map(lambda x: x.name, paramsDescriptions))))
 
                         if funcCName in ["zway_cc_proprietary_set", "zway_cc_thermostat_mode_set_manufacturer_specific", "zway_cc_user_code_set_raw", "zway_cc_user_code_master_code_set_raw", "zway_cc_indicator_set_multiple", "zway_cc_firmware_update_perform", "zway_cc_firmware_update_activation", "zway_cc_switch_color_set_multiple", "zway_cc_security_inject", "zway_cc_security_s2_inject", "zway_cc_node_naming_set_name", "zway_cc_node_naming_set_location", "zway_cc_user_code_set", "zway_cc_user_code_master_code_set"]:
-                                continue #####################^^^^^^^^^^^^^^^^^
+                                continue # TODO remove this
 
                         cmd = Command(funcCName)
                         cmd.params = paramsDescriptions
