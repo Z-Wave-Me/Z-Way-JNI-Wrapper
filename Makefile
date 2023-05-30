@@ -30,7 +30,7 @@ LIBS += -lpthread -lxml2 -lz -lm -lcrypto -larchive
 
 ### Targets ###
 
-all: $(TARGET_SO) $(J_OBJECTS) copy
+all: prepare $(TARGET_SO) $(J_OBJECTS) copy
 
 $(TARGET_SO): $(C_OBJECTS)
 	$(CC) $(LIBDIR) $(TARGET_LIBDIR) $(LDFLAGS) $(TARGET_ARCH) -o $@ $< $(LIBS)
@@ -41,6 +41,9 @@ $(TARGET_SO): $(C_OBJECTS)
 %.o: %.c $(wildcard *.h)
 	$(CC) $(INCLUDES) $(TARGET_INCLUDES) $(CFLAGS) $(TARGET_ARCH) -c $< -o $@
 
+prepare:
+	python2 autogenerate_code.py 
+	
 clean:
 	rm -f *.o *.class $(TARGET_SO) $(TARGET_DIR)/* hs_err_pid*.log
 	python2 autogenerate_code.py clean
@@ -51,4 +54,4 @@ copy:
 run:
 	sudo LD_LIBRARY_PATH=$(ZWAY_LIB_DIR) java -Djava.library.path=$(TARGET_DIR) Main
 
-.PHONY: all clean copy run
+.PHONY: all prepare clean copy run

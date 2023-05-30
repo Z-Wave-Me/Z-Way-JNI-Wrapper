@@ -105,16 +105,16 @@ def GetParamParser(type, name, i):
 
         raise ValueError("")
 
-def GetParamJavaDeclaration(param):
+def GetParamJNIDeclaration(param):
         type = param.type
         if type == 'ZWBOOL':
                 jtype = 'jboolean'
         elif type == 'unsigned short' or type == 'unsigned short int' or type == 'unsigned int' or type == 'int' or type == 'speed_t' or type == 'ZWBYTE' or type == 'ZWNODE':
                 jtype = 'jint'
         elif type == 'const ZWBYTE *' or type == 'ZWBYTE *':
-                jtype = '???'
+                jtype = 'jlong' # ???
         elif type == 'const ZWNODE *' or type == 'ZWNODE *':
-                jtype = '???'
+                jtype = 'jlong' # ???
         elif type == 'ZWCSTR':
                 jtype = 'jstring'
         elif type == 'float':
@@ -123,6 +123,28 @@ def GetParamJavaDeclaration(param):
                 jtype = 'jlong'
         elif type == 'size_t':
                 jtype = 'jlong'
+        else:     
+                raise ValueError("Error parsing parameter " + str(param))
+        return jtype + ' ' + param.name + ', '
+
+def GetParamJavaDeclaration(param):
+        type = param.type
+        if type == 'ZWBOOL':
+                jtype = 'boolean'
+        elif type == 'unsigned short' or type == 'unsigned short int' or type == 'unsigned int' or type == 'int' or type == 'speed_t' or type == 'ZWBYTE' or type == 'ZWNODE':
+                jtype = 'int'
+        elif type == 'const ZWBYTE *' or type == 'ZWBYTE *':
+                jtype = 'long' # ???
+        elif type == 'const ZWNODE *' or type == 'ZWNODE *':
+                jtype = 'long' # ???
+        elif type == 'ZWCSTR':
+                jtype = 'string'
+        elif type == 'float':
+                jtype = 'float'
+        elif type == 'time_t':
+                jtype = 'long'
+        elif type == 'size_t':
+                jtype = 'long'
         else:     
                 raise ValueError("Error parsing parameter " + str(param))
         return jtype + ' ' + param.name + ', '
@@ -237,6 +259,9 @@ def ParseCC():
                             except:
                                 raise ValueError("%s: Can not match parameter %s in [%s]" % (funcCName, p[1], ', '.join(map(lambda x: x.name, paramsDescriptions))))
 
+                        if funcCName in ["zway_cc_proprietary_set", "zway_cc_thermostat_mode_set_manufacturer_specific", "zway_cc_user_code_set_raw", "zway_cc_user_code_master_code_set_raw", "zway_cc_indicator_set_multiple", "zway_cc_firmware_update_perform", "zway_cc_firmware_update_activation", "zway_cc_switch_color_set_multiple", "zway_cc_security_inject", "zway_cc_security_s2_inject", "zway_cc_node_naming_set_name", "zway_cc_node_naming_set_location", "zway_cc_user_code_set", "zway_cc_user_code_master_code_set"]:
+                                continue #####################^^^^^^^^^^^^^^^^^
+
                         cmd = Command(funcCName)
                         cmd.params = paramsDescriptions
                         commandClasses[-1].commands.append(cmd)
@@ -305,6 +330,7 @@ def GenerateCodeCC(template):
                                         .replace("%function_short_name%", cmd.name.replace("zway_cc_", ""))
                                         .replace("%function_short_camel_case_name%", CamelCase(cmd.name.replace("zway_cc_", "")))
                                         .replace("%params%", "".join(map(lambda p: p.name + ", ", cmd.params)))
+                                        .replace("%params_jni_declarations%", "".join(map(GetParamJNIDeclaration, cmd.params)))
                                         .replace("%params_java_declarations%", "".join(map(GetParamJavaDeclaration, cmd.params)))
                                         .replace("%params_signature%", "".join(map(GetParamSignature, cmd.params)))
                                 )
