@@ -42,7 +42,7 @@ $(TARGET_SO): $(C_OBJECTS)
 	$(CC) $(INCLUDES) $(TARGET_INCLUDES) $(CFLAGS) $(TARGET_ARCH) -c $< -o $@
 
 clean:
-	rm -f *.o *.class $(TARGET_SO) $(TARGET_DIR)/*
+	rm -f *.o *.class $(TARGET_SO) $(TARGET_DIR)/* hs_err_pid*.log
 	python2 autogenerate_code.py clean
 
 copy:
