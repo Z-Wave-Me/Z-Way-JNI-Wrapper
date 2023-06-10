@@ -5,8 +5,8 @@
 #include <ZWayLib.h>
 #include <ZLogging.h>
 
-#define JNIT_CLASS "ZWay"
-#define JNIT_CLASS_DATA "ZWay.Data"
+#define JNIT_CLASS "ZWayJNIWrapper/ZWay"
+#define JNIT_CLASS_DATA "ZWayJNIWrapper/ZWay.Data"
 
 #define JNI_THROW_EXCEPTION_INTERNAL() \
     jclass Exception = (*env)->FindClass(env, "java/lang/Exception"); \

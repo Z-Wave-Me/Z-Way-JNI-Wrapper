@@ -1,3 +1,5 @@
+package ZWayJNIWrapper;
+
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -5,6 +7,14 @@ import java.util.List;
 import java.util.Map;
 
 public final class ZWay {
+    public final static int deviceAdded = 0x01;
+    public final static int deviceRemoved = 0x02;
+    public final static int instanceAdded = 0x04;
+    public final static int instanceRemoved = 0x08;
+    public final static int commandAdded = 0x10;
+    public final static int commandRemoved = 0x20;
+    public final static int ZDDXSaved = 0x100; // this callback notifies on ZDDX data change (to allow main program to purge buffers to disk/flash). For this event node_id = instance_id = command_id = 0
+    public final static int enumerateExisting = 0x200; // this flag makes callback immediately fire for all existing devices/instances/command classes as if they're just added
     private final long jzway;
 
     public Controller controller;
@@ -49,8 +59,46 @@ public final class ZWay {
         System.out.println("dataCallback: type = " + String.valueOf(type));
     }
 
-    private void deviceCallback(int type, int deviceId, int instanceId, int commandClassId, Object obj) {
-        System.out.println("deviceCallback: type = " + String.valueOf(type) + ", id = " + deviceId + ", instance = " + instanceId + ", commandClass = " + commandClassId);
+    private void deviceCallback(int type, int deviceId, int instanceId, int commandClassId) {
+        if (type == deviceAdded) {
+            System.out.println("Device added " + deviceId);
+            Device dev = new Device(this, deviceId);
+            this.devices.put(deviceId, dev);
+            dev.instances.put(0, dev.new Instance(this, 0));
+        } else if (type == deviceRemoved) {
+            System.out.println("Device removed " + deviceId);
+            devices.remove(deviceId);
+        } else if (type == instanceAdded) {
+            System.out.println("Instance added " + deviceId + ":" + instanceId);
+            Device device = devices.get(deviceId);
+            device.instances.put(instanceId, device.new Instance(this, instanceId));
+        } else if (type == instanceRemoved) {
+            System.out.println("Instance removed " + deviceId + ":" + instanceId);
+            devices.get(deviceId).instances.remove(instanceId);
+        } else if (type == commandAdded) {
+            System.out.println("Command Class added " + deviceId + ":" + instanceId + " " + commandClassId);
+            Device device = devices.get(deviceId);
+            Device.Instance instance = device.instances.get(instanceId);
+            switch (commandClassId) {
+                case 0x25:
+                    Device.Instance.SwitchBinary commandSB = instance.new SwitchBinary(this);
+                    instance.commands.put(commandClassId, commandSB);
+                    instance.commandsByName.put("switchBinary", commandSB);
+            }
+
+        } else if (type == commandRemoved) {
+            System.out.println("Command Class removed " + deviceId + ":" + instanceId + " " + commandClassId);
+            Device.Instance instance = devices.get(deviceId).instances.get(instanceId);
+            instance.commands.remove(commandClassId);
+            switch (commandClassId) {
+                case 0x25:
+                    instance.commands.remove(commandClassId);
+                    instance.commandsByName.remove("switchBinary");
+            }
+
+        } else {
+            System.out.println("Unhandled deviceCallback: type = " + type + ", id = " + deviceId + ", instance = " + instanceId + ", commandClass = " + commandClassId);
+        }
     }
 
     private void terminateCallback() {
@@ -410,7 +458,7 @@ public final class ZWay {
         }
     }
 
-    protected final class Controller {
+    public final class Controller {
         private final long jzway;
 
         public Controller(ZWay zWay) {
@@ -430,7 +478,7 @@ public final class ZWay {
         }
     }
 
-    protected final class Device {
+    public final class Device {
         private final long jzway;
 
         public final Integer id;
@@ -443,7 +491,7 @@ public final class ZWay {
             instances = new HashMap<>();
         }
 
-        protected final class Instance {
+        public final class Instance {
             private final long jzway;
 
             public final Integer id;
@@ -454,30 +502,46 @@ public final class ZWay {
                 jzway = zWay.jzway;
                 id = instance_id;
                 commands = new HashMap<>();
+                commandsByName = new HashMap<>();
             }
 
-            protected class Command {
+            public class Command {
                 protected final long jzway;
 
                 public Command(ZWay zWay) {
                     jzway = zWay.jzway;
                 }
+
+                public Type findById(Integer id) {
+                    switch (id) {
+                        case 0x25:
+                            return SwitchBinary.class;
+                    }
+                    return null;
+                }
+
+                public String nameById(Integer id) {
+                    switch (id) {
+                        case 0x25:
+                            return "switchBinary";
+                    }
+                    return null;
+                }
             }
 
             // AUTOGENERATED CODE BEGIN: CC CLASSES
-            protected final class SwitchBinary extends Command {
-                protected final Integer id;
+            public final class SwitchBinary extends Command {
+                public final static int id = 0x25;
 
-                public SwitchBinary(ZWay zWay, Integer id) {
+                public SwitchBinary(ZWay zWay) {
                     super(zWay);
-                    this.id = id;
                 }
 
                 public void set(boolean s) {
 
                 }
 
-                public void cc_switchBinarySet(int deviceId, int instanceId, boolean value, int duration, long successCallback, long failureCallback, long callbackArg) {
+                public void set(int deviceId, int instanceId, boolean value, int duration, long successCallback, long failureCallback, long callbackArg) {
                     //long LsuccessCallback = successCallback.hashCode();
                     jni_cc_switchBinarySet(jzway, deviceId, instanceId, value, duration, successCallback, failureCallback, callbackArg);
                 }
