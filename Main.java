@@ -14,15 +14,19 @@ class Main {
         //zway.controller.addNodeToNetwork(true);
         //zway.controller.removeNodeFromNetwork(true);
 
-        //((ZWay.Device.Instance.SwitchBinary) zway.devices.get(2).instances.get(0).commandsByName.get("switchBinary")).data.get("level").bind(myCallback);
-        //System.out.println("switch level: " + String.valueOf(((ZWay.Device.Instance.SwitchBinary) zway.devices.get(2).instances.get(0).commandsByName.get("switchBinary")).data.get("level").getBoolean()));
+        //((ZWay.Device.Instance.SwitchBinary) zway.devices.get(2).instances.get(0).commandClassesByName.get("switchBinary")).data.get("level").bind(myCallback);
+        try {
+            System.out.println("switch level: " + String.valueOf(((ZWay.Device.Instance.SwitchBinary) zway.devices.get(2).instances.get(0).commandClassesByName.get("switchBinary")).data.get("level").getBool()));
+        } catch (java.lang.Exception e) {
+            System.out.println(e);
+        }
 
         boolean s = false;
         while (zway.isRunning()) {
             Thread.sleep(1000);
             try {
                 System.out.println("switch");
-                ((ZWay.Device.Instance.SwitchBinary) zway.devices.get(1).instances.get(0).commandsByName.get("switchBinary")).set(s, 0);
+                ((ZWay.Device.Instance.SwitchBinary) zway.devices.get(1).instances.get(0).commandClassesByName.get("switchBinary")).set(s, 0);
             } catch (java.lang.Exception e) {
                 System.out.println(e);
             }

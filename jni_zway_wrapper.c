@@ -60,7 +60,7 @@ typedef struct JDataArg * JDataArg;
 static void successCallback(const ZWay zway, ZWBYTE funcId, void *jarg);
 static void failureCallback(const ZWay zway, ZWBYTE funcId, void *jarg);
 static void dataCallback(const ZWay zway, ZWDataChangeType type, void *jarg);
-static void deviceCallback(const ZWay zway, ZWDeviceChangeType type, ZWNODE node_id, ZWBYTE instance_id, ZWBYTE command_id, void *jarg);
+static void deviceCallback(const ZWay zway, ZWDeviceChangeType type, ZWNODE node_id, ZWBYTE instance_id, ZWBYTE command_class_id, void *jarg);
 static void terminateCallback(const ZWay zway, void* arg);
 
 // TODO: use an appropriate callback for java - terminator_callback
@@ -315,10 +315,7 @@ static jlong jni_zdata_instance_find(JNIEnv *env, jobject obj, jstring path, jin
     return (jlong) jzdata;
 }
 
-static jlong jni_zdata_command_find(JNIEnv *env, jobject obj, jlong dh, jstring path, jint device_id, jint instance_id, jint command_id, jlong jzway) {
-    (void)obj;
-    (void)env;
-
+static jlong jni_zdata_command_class_find(JNIEnv *env, jobject obj, jlong dh, jstring path, jint device_id, jint instance_id, jint command_class_id, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
     jzdata->zway = ((JZWay)jzway)->zway;
 
@@ -334,7 +331,7 @@ static jlong jni_zdata_command_find(JNIEnv *env, jobject obj, jlong dh, jstring 
     str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
 
     zdata_acquire_lock(ZDataRoot(jzdata->zway));
-    jzdata->dh = zway_find_device_instance_cc_data(jzdata->zway, device_id, instance_id, command_id, str_path);
+    jzdata->dh = zway_find_device_instance_cc_data(jzdata->zway, device_id, instance_id, command_class_id, str_path);
     zdata_release_lock(ZDataRoot(jzdata->zway));
 
     (*env)->ReleaseStringUTFChars(env, path, str_path);
@@ -852,14 +849,14 @@ static void dataCallback(const ZWay zway, ZWDataChangeType type, void *jdata_arg
     (*(jzdata->jvm))->DetachCurrentThread(jzdata->jvm);
 }
 
-static void deviceCallback(const ZWay zway, ZWDeviceChangeType type, ZWNODE node_id, ZWBYTE instance_id, ZWBYTE command_id, void *arg) {
+static void deviceCallback(const ZWay zway, ZWDeviceChangeType type, ZWNODE node_id, ZWBYTE instance_id, ZWBYTE command_class_id, void *arg) {
     (void) zway;
 
     JZWay jzway = (JZWay) arg;
 
     JNIEnv* env;
     (*(jzway->jvm))->AttachCurrentThread(jzway->jvm, (void**) &env, NULL);
-    (*env)->CallVoidMethod(env, jzway->self, jzway->deviceCallbackID, (int)type, (int)node_id, (int)instance_id, (int)command_id);
+    (*env)->CallVoidMethod(env, jzway->self, jzway->deviceCallbackID, (int)type, (int)node_id, (int)instance_id, (int)command_class_id);
     (*(jzway->jvm))->DetachCurrentThread(jzway->jvm);
 }
 
@@ -912,7 +909,7 @@ static JNINativeMethod funcs[] = {
 	{ "jni_zdataControllerFind", "(Ljava/lang/String;J)J", (void *)&jni_zdata_controller_find },
 	{ "jni_zdataDeviceFind", "(Ljava/lang/String;IJ)J", (void *)&jni_zdata_device_find },
 	{ "jni_zdataInstanceFind", "(Ljava/lang/String;IIJ)J", (void *)&jni_zdata_instance_find },
-	{ "jni_zdataCommandFind", "(Ljava/lang/String;IIIJ)J", (void *)&jni_zdata_command_find },
+	{ "jni_zdataCommandClassFind", "(Ljava/lang/String;IIIJ)J", (void *)&jni_zdata_command_class_find },
 	{ "jni_zdataAddCallbackEx", "(J)V", (void *)&jni_zdata_add_callback_ex },
 	{ "jni_zdataRemoveCallbackEx", "(J)V", (void *)&jni_zdata_remove_callback_ex },
 	{ "jni_zdataGetName", "(J)Ljava/lang/String;", (void *)&jni_zdata_get_name },
