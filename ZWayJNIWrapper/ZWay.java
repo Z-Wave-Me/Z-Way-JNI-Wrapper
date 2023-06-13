@@ -496,8 +496,8 @@ public final class ZWay {
         
         public final Data data;
 
-        public Controller(ZWay zWay) throws Exception {
-            jzway = zWay.jzway;
+        public Controller(ZWay zway) throws Exception {
+            jzway = zway.jzway;
             data = new Data("", jzway);
         }
         
@@ -522,8 +522,8 @@ public final class ZWay {
 
         public Map<Integer, Instance> instances;
 
-        public Device(ZWay zWay, Integer device_id) throws Exception {
-            jzway = zWay.jzway;
+        public Device(ZWay zway, Integer device_id) throws Exception {
+            jzway = zway.jzway;
             id = device_id;
             data = new Data("", device_id, jzway);
             instances = new HashMap<>();
@@ -539,8 +539,8 @@ public final class ZWay {
             public Map<Integer, CommandClass> commandClasses;
             public Map<String, CommandClass> commandClassesByName;
             
-            public Instance(ZWay zWay, Device dev, Integer instance_id) throws Exception {
-                jzway = zWay.jzway;
+            public Instance(ZWay zway, Device dev, Integer instance_id) throws Exception {
+                jzway = zway.jzway;
                 device = dev;
                 id = instance_id;
                 data = new Data("", dev.id, instance_id, jzway);
@@ -554,8 +554,8 @@ public final class ZWay {
 
                 public final Data data = null;
                 
-                public CommandClass(ZWay zWay, Instance inst) throws Exception {
-                    jzway = zWay.jzway;
+                public CommandClass(ZWay zway, Instance inst) throws Exception {
+                    jzway = zway.jzway;
                     instance = inst;
                 }
             }
@@ -565,8 +565,8 @@ public final class ZWay {
                 public final static int id = %cc_id%;
                 public final Data data;
 
-                public %cc_capitalized_name%(ZWay zWay, Instance instance) throws Exception {
-                    super(zWay, instance);
+                public %cc_capitalized_name%(ZWay zway, Instance instance) throws Exception {
+                    super(zway, instance);
                     data = new Data("", instance.device.id, instance.id, %cc_id%, jzway);
                 }
 
