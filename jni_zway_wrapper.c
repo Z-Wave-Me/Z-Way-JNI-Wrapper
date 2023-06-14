@@ -6,7 +6,7 @@
 #include <ZLogging.h>
 
 #define JNIT_CLASS "ZWayJNIWrapper/ZWay"
-#define JNIT_CLASS_DATA "ZWayJNIWrapper/ZWay.Data"
+#define JNIT_CLASS_DATA JNIT_CLASS "$Data"
 
 #define JNI_THROW_EXCEPTION_INTERNAL() \
     jclass Exception = (*env)->FindClass(env, "java/lang/Exception"); \
@@ -55,7 +55,7 @@ typedef struct JDataArg * JDataArg;
 
 static void successCallback(const ZWay zway, ZWBYTE funcId, void *jarg);
 static void failureCallback(const ZWay zway, ZWBYTE funcId, void *jarg);
-static void dataCallback(const ZWay zway, ZWDataChangeType type, void *jarg);
+static void dataCallback(const ZWay zway, ZWDataChangeType type, ZDataHolder dh, void *jarg);
 static void deviceCallback(const ZWay zway, ZWDeviceChangeType type, ZWNODE node_id, ZWBYTE instance_id, ZWBYTE command_class_id, void *jarg);
 static void terminateCallback(const ZWay zway, void* arg);
 
@@ -115,20 +115,30 @@ static void jni_discover(JNIEnv *env, jobject obj, jlong ptr) {
     JZWay jzway = (JZWay)ptr;
 
     jclass cls = (*env)->FindClass(env, JNIT_CLASS);
+    if (cls == 0) {
+        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS " class not found"));
+        ZWError err = InvalidArg;
+        JNI_THROW_EXCEPTION();
+    }
     jmethodID successCallbackID = (*env)->GetMethodID(env, cls, "successCallback", "(Ljava/lang/Object;)V");
     jmethodID failureCallbackID = (*env)->GetMethodID(env, cls, "failureCallback", "(Ljava/lang/Object;)V");
     jmethodID deviceCallbackID = (*env)->GetMethodID(env, cls, "deviceCallback", "(IIII)V");
     jmethodID terminateCallbackID = (*env)->GetMethodID(env, cls, "terminateCallback", "()V");
     if (successCallbackID == 0 || failureCallbackID == 0 || deviceCallbackID == 0 || terminateCallbackID == 0) {
-        zway_log(jzway->zway, Critical, ZSTR("CallbackID method not found"));
+        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS " callback ID method not found"));
         ZWError err = InvalidArg;
         JNI_THROW_EXCEPTION();
     }
 
     jclass clsData = (*env)->FindClass(env, JNIT_CLASS_DATA);
-    jmethodID dataCallbackID = (*env)->GetMethodID(env, clsData, "dataCallback", "(ILjava/lang/Object;)V");
+    if (clsData == 0) {
+        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS_DATA " class not found"));
+        ZWError err = InvalidArg;
+        JNI_THROW_EXCEPTION();
+    }
+    jmethodID dataCallbackID = (*env)->GetMethodID(env, clsData, "dataCallback", "(IJ)V");
     if (dataCallbackID == 0) {
-        zway_log(jzway->zway, Critical, ZSTR("CallbackID method not found"));
+        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS_DATA " callback ID method not found"));
         ZWError err = InvalidArg;
         JNI_THROW_EXCEPTION();
     }
@@ -278,7 +288,7 @@ static jlong jni_zdata_instance_find(JNIEnv *env, jobject obj, jstring path, jin
     return (jlong)jzdata;
 }
 
-static jlong jni_zdata_command_class_find(JNIEnv *env, jobject obj, jlong dh, jstring path, jint device_id, jint instance_id, jint command_class_id, jlong jzway) {
+static jlong jni_zdata_command_class_find(JNIEnv *env, jobject obj, jstring path, jint device_id, jint instance_id, jint command_class_id, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
     jzdata->jzway = (JZWay)jzway;
 
@@ -766,14 +776,14 @@ static void failureCallback(const ZWay zway, ZWBYTE funcId, void *jarg) {
     free(jarg);
 }
 
-static void dataCallback(const ZWay zway, ZWDataChangeType type, void *jdata_arg) {
+static void dataCallback(const ZWay zway, ZWDataChangeType type, ZDataHolder dh, void *arg) {
     (void)zway;
 
-    JZData jzdata = ((JDataArg)jdata_arg)->jzdata;
+    JZData jzdata = (JZData)arg;
 
     JNIEnv* env;
     (*(jzdata->jzway->jvm))->AttachCurrentThread(jzdata->jzway->jvm, (void**) &env, NULL);
-    (*env)->CallVoidMethod(env, jzdata->self, jzdata->jzway->deviceCallbackID, ((JDataArg)jdata_arg)->arg);
+    (*env)->CallVoidMethod(env, jzdata->self, jzdata->jzway->dataCallbackID, type, jzdata->dh);
     (*(jzdata->jzway->jvm))->DetachCurrentThread(jzdata->jzway->jvm);
 }
 
