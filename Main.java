@@ -26,7 +26,7 @@ class Main {
             Thread.sleep(1000);
             try {
                 System.out.println("switch");
-                ((ZWay.Device.Instance.SwitchBinary) zway.devices.get(1).instances.get(0).commandClassesByName.get("switchBinary")).set(s, 0);
+                ((ZWay.Device.Instance.SwitchBinary) zway.devices.get(2).instances.get(0).commandClassesByName.get("switchBinary")).set(s, 0);
             } catch (java.lang.Exception e) {
                 System.out.println(e);
             }
