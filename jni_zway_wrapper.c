@@ -297,17 +297,13 @@ static jlong jni_zdata_command_class_find(JNIEnv *env, jobject obj, jlong dh, js
     return (jlong)jzdata;
 }
 
-static void jni_zdata_add_callback_ex(JNIEnv *env, jobject obj, jlong dh, jobject arg) {
+static void jni_zdata_add_callback(JNIEnv *env, jobject obj, jlong dh) {
     (void)obj;
 
     JZData jzdata = (JZData)dh;
 
-    JDataArg jdata_arg = (JDataArg)malloc(sizeof(struct JDataArg));
-    jdata_arg->jzdata = jzdata;
-    jdata_arg->arg = arg;
-
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
-    ZWError err = zdata_add_callback_ex(jzdata->dh, (ZDataChangeCallback)&dataCallback, 0, jdata_arg->arg); // TODO do something with those 0 (ZWBOOL watch_children)
+    ZWError err = zdata_add_callback(jzdata->dh, (ZDataChangeCallback)&dataCallback, 0, jzdata);
     zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
 
     if (err != NoError) {
@@ -315,24 +311,18 @@ static void jni_zdata_add_callback_ex(JNIEnv *env, jobject obj, jlong dh, jobjec
     }
 }
 
-static void jni_zdata_remove_callback_ex(JNIEnv *env, jobject obj, jlong dh, jobject arg) {
+static void jni_zdata_remove_callback(JNIEnv *env, jobject obj, jlong dh) {
     (void)obj;
 
     JZData jzdata = (JZData)dh;
 
-    JDataArg jdata_arg = (JDataArg)malloc(sizeof(struct JDataArg));
-    jdata_arg->jzdata = jzdata;
-    jdata_arg->arg = arg;
-
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
-    ZWError err = zdata_remove_callback_ex(jzdata->dh, (ZDataChangeCallback)&dataCallback, jdata_arg->arg);
+    ZWError err = zdata_remove_callback(jzdata->dh, (ZDataChangeCallback)&dataCallback);
     zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
 
     if (err != NoError) {
         JNI_THROW_EXCEPTION();
     }
-
-    free(jdata_arg);
 }
 
 static jstring jni_zdata_get_name(JNIEnv *env, jobject obj, jlong dh) {
@@ -848,8 +838,8 @@ static JNINativeMethod funcs[] = {
     { "jni_zdataDeviceFind", "(Ljava/lang/String;IJ)J", (void *)&jni_zdata_device_find },
     { "jni_zdataInstanceFind", "(Ljava/lang/String;IIJ)J", (void *)&jni_zdata_instance_find },
     { "jni_zdataCommandClassFind", "(Ljava/lang/String;IIIJ)J", (void *)&jni_zdata_command_class_find },
-    { "jni_zdataAddCallbackEx", "(J)V", (void *)&jni_zdata_add_callback_ex },
-    { "jni_zdataRemoveCallbackEx", "(J)V", (void *)&jni_zdata_remove_callback_ex },
+    { "jni_zdataAddCallback", "(J)V", (void *)&jni_zdata_add_callback },
+    { "jni_zdataRemoveCallback", "(J)V", (void *)&jni_zdata_remove_callback },
     { "jni_zdataGetName", "(J)Ljava/lang/String;", (void *)&jni_zdata_get_name },
     { "jni_zdataGetPath", "(J)Ljava/lang/String;", (void *)&jni_zdata_get_path },
     { "jni_zdataGetChildren", "(J)[J", (void *)&jni_zdata_get_children },

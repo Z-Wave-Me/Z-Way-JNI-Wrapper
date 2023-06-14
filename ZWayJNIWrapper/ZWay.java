@@ -135,8 +135,8 @@ public final class ZWay {
     private native long jni_zdataDeviceFind(String path, int deviceId, long jzway);
     private native long jni_zdataInstanceFind(String path, int deviceId, int instanceId, long jzway);
     private native long jni_zdataCommandClassFind(String path, int deviceId, int instanceId, int commandClassId, long jzway);
-    private native void jni_zdataAddCallbackEx(long dh);
-    private native void jni_zdataRemoveCallbackEx(long dh);
+    private native void jni_zdataAddCallback(long dh);
+    private native void jni_zdataRemoveCallback(long dh);
     private native String jni_zdataGetName(long data);
     private native int jni_zdataGetType(long dh);
     private native boolean jni_zdataGetBoolean(long dh);
@@ -203,7 +203,7 @@ public final class ZWay {
             dh = jni_zdataFind(dhParent, path, jzway);
             name = jni_zdataGetName(dh);
             this.path = jni_zdataGetPath(dh);
-            jni_zdataAddCallbackEx(dh);
+            jni_zdataAddCallback(dh);
             getValue();
         }
 
@@ -212,7 +212,7 @@ public final class ZWay {
             dh = jni_zdataControllerFind(path, jzway);
             name = jni_zdataGetName(dh);
             this.path = jni_zdataGetPath(dh);
-            jni_zdataAddCallbackEx(dh);
+            jni_zdataAddCallback(dh);
             getValue();
         }
 
@@ -221,7 +221,7 @@ public final class ZWay {
             dh = jni_zdataDeviceFind(path, deviceId, jzway);
             name = jni_zdataGetName(dh);
             this.path = jni_zdataGetPath(dh);
-            jni_zdataAddCallbackEx(dh);
+            jni_zdataAddCallback(dh);
             getValue();
         }
 
@@ -230,7 +230,7 @@ public final class ZWay {
             dh = jni_zdataInstanceFind(path, deviceId, instanceId, jzway);
             name = jni_zdataGetName(dh);
             this.path = jni_zdataGetPath(dh);
-            jni_zdataAddCallbackEx(dh);
+            jni_zdataAddCallback(dh);
             getValue();
         }
 
@@ -239,7 +239,7 @@ public final class ZWay {
             dh = jni_zdataCommandClassFind(path, deviceId, instanceId, commandClassId, jzway);
             name = jni_zdataGetName(dh);
             this.path = jni_zdataGetPath(dh);
-            jni_zdataAddCallbackEx(dh);
+            jni_zdataAddCallback(dh);
             getValue();
         }
 
@@ -248,16 +248,16 @@ public final class ZWay {
             this.dh = dh;
             name = jni_zdataGetName(dh);
             this.path = jni_zdataGetPath(dh);
-            jni_zdataAddCallbackEx(dh);
+            jni_zdataAddCallback(dh);
             getValue();
         }
         
         /* @Override TODO replace finalizer with something else
         protected void finalize() throws Throwable {
-            jni_zdataRemoveCallbackEx(dh);
+            jni_zdataRemoveCallback(dh);
         }*/
 
-        private void dataCallback(int type, Object obj) throws Exception {
+        private void dataCallback(int type, long dh) throws Exception {
             System.out.println("dataCallback: type = " + type);
             // get type of the event
             boolean isPhantom = (phantomUpdate & type) > 0;
