@@ -215,9 +215,7 @@ static jboolean jni_is_running(JNIEnv *env, jobject obj, jlong jzway) {
 static jlong jni_zdata_find(JNIEnv *env, jobject obj, jlong dh, jstring path, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
     jzdata->jzway = (JZWay)jzway;
-
-    (*env)->GetJavaVM(env, &(jzdata->jzway->jvm));
-    jzdata->self = (*env)->NewGlobalRef(env, obj);
+    jzdata->self = NULL;
 
     const char *str_path;
     str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
@@ -234,9 +232,7 @@ static jlong jni_zdata_find(JNIEnv *env, jobject obj, jlong dh, jstring path, jl
 static jlong jni_zdata_controller_find(JNIEnv *env, jobject obj, jstring path, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
     jzdata->jzway = (JZWay)jzway;
-
-    (*env)->GetJavaVM(env, &(jzdata->jzway->jvm));
-    jzdata->self = (*env)->NewGlobalRef(env, obj);
+    jzdata->self = NULL;
 
     const char *str_path;
     str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
@@ -253,9 +249,7 @@ static jlong jni_zdata_controller_find(JNIEnv *env, jobject obj, jstring path, j
 static jlong jni_zdata_device_find(JNIEnv *env, jobject obj, jstring path, jint device_id, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
     jzdata->jzway = (JZWay)jzway;
-
-    (*env)->GetJavaVM(env, &(jzdata->jzway->jvm));
-    jzdata->self = (*env)->NewGlobalRef(env, obj);
+    jzdata->self = NULL;
 
     const char *str_path;
     str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
@@ -272,9 +266,7 @@ static jlong jni_zdata_device_find(JNIEnv *env, jobject obj, jstring path, jint 
 static jlong jni_zdata_instance_find(JNIEnv *env, jobject obj, jstring path, jint device_id, jint instance_id, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
     jzdata->jzway = (JZWay)jzway;
-
-    (*env)->GetJavaVM(env, &(jzdata->jzway->jvm));
-    jzdata->self = (*env)->NewGlobalRef(env, obj);
+    jzdata->self = NULL;
 
     const char *str_path;
     str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
@@ -291,9 +283,7 @@ static jlong jni_zdata_instance_find(JNIEnv *env, jobject obj, jstring path, jin
 static jlong jni_zdata_command_class_find(JNIEnv *env, jobject obj, jstring path, jint device_id, jint instance_id, jint command_class_id, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
     jzdata->jzway = (JZWay)jzway;
-
-    (*env)->GetJavaVM(env, &(jzdata->jzway->jvm));
-    jzdata->self = (*env)->NewGlobalRef(env, obj);
+    jzdata->self = NULL;
 
     const char *str_path;
     str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
@@ -311,7 +301,11 @@ static void jni_zdata_add_callback(JNIEnv *env, jobject obj, jlong dh) {
     (void)obj;
 
     JZData jzdata = (JZData)dh;
-
+    
+    if (jzdata->self == NULL) {
+        jzdata->self = (*env)->NewGlobalRef(env, obj);
+    }
+    
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     ZWError err = zdata_add_callback(jzdata->dh, (ZDataChangeCallback)&dataCallback, 0, jzdata);
     zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
