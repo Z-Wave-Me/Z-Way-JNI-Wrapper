@@ -136,7 +136,7 @@ static void jni_discover(JNIEnv *env, jobject obj, jlong ptr) {
         ZWError err = InvalidArg;
         JNI_THROW_EXCEPTION();
     }
-    jmethodID dataCallbackID = (*env)->GetMethodID(env, clsData, "dataCallback", "(IJ)V");
+    jmethodID dataCallbackID = (*env)->GetMethodID(env, clsData, "dataCallback", "(I)V");
     if (dataCallbackID == 0) {
         zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS_DATA " callback ID method not found"));
         ZWError err = InvalidArg;
@@ -774,10 +774,11 @@ static void dataCallback(const ZWay zway, ZWDataChangeType type, ZDataHolder dh,
     (void)zway;
 
     JZData jzdata = (JZData)arg;
-
+printf("Cbk dh self = %p, jzdata = %p\n", jzdata->self, jzdata);
+printf("jdh = %p, dh = %p, dh = %p\n", jzdata, dh, jzdata->dh);
     JNIEnv* env;
     (*(jzdata->jzway->jvm))->AttachCurrentThread(jzdata->jzway->jvm, (void**) &env, NULL);
-    (*env)->CallVoidMethod(env, jzdata->self, jzdata->jzway->dataCallbackID, type, jzdata->dh);
+    (*env)->CallVoidMethod(env, jzdata->self, jzdata->jzway->dataCallbackID, type);
     (*(jzdata->jzway->jvm))->DetachCurrentThread(jzdata->jzway->jvm);
 }
 
