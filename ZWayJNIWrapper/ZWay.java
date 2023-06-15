@@ -400,7 +400,7 @@ public final class ZWay {
         public void setString(String data) throws NotAlive {
             isAlive();
             
-            jni_zdataSetString(dh, data, false); // TODO what is copy is it always false?
+            jni_zdataSetString(dh, data, true);
         }
 
         public void setByteList(Integer[] data) throws NotAlive {
