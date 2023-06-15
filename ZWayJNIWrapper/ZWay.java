@@ -249,11 +249,13 @@ public final class ZWay {
             callbacks = new HashSet<>();
             getValue();
         }
-        
-        /* @Override TODO replace finalizer with something else
-        protected void finalize() throws Throwable {
-            jni_zdataRemoveCallback(dh);
-        }*/
+
+        @Override
+        public void finalize() {
+            if (isMonitored) {
+                jni_zdataRemoveCallback(dh);
+            }
+        }
 
         private void init() {
             // here we will let the C part save this object
