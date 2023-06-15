@@ -443,7 +443,7 @@ public final class ZWay {
             jni_zdataSetStringArray(dh, data, size, false);
         }
 
-        public void setNull() throws NotAlive {
+        public void setEmpty() throws NotAlive {
             isAlive();
             
             jni_zdataSetEmpty(dh);
