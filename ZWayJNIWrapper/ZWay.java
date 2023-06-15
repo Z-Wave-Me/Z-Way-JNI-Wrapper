@@ -25,7 +25,7 @@ public final class ZWay {
     public ZWay(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder, long ternminator_callback) throws Exception {
         jzway = jni_zwayInit(name, port, speed, config_folder, translations_folder, zddx_folder, ternminator_callback);
 
-        controller = new Controller(this);
+        controller = new Controller();
         devices = new HashMap<>();
     }
 
@@ -190,7 +190,6 @@ public final class ZWay {
         private String valueTypeStr;
 
         private long dh;
-        private long jzway;
 
         public final String name;
 
@@ -218,26 +217,26 @@ public final class ZWay {
         // constructors
         
         public Data(String path, long dhParent) throws NotFound, Exception {
-            this(jni_zdataFind(dhParent, path, jzway), jzway);
+            this(jni_zdataFind(dhParent, path, jzway));
         }
 
         public Data(String path) throws NotFound, Exception {
-            this(jni_zdataControllerFind(path, jzway), jzway);
+            this(jni_zdataControllerFind(path, jzway));
         }
 
         public Data(String path, int deviceId) throws NotFound, Exception {
-            this(jni_zdataDeviceFind(path, deviceId, jzway), jzway);
+            this(jni_zdataDeviceFind(path, deviceId, jzway));
         }
 
         public Data(String path, int deviceId, int instanceId) throws NotFound, Exception {
-            this(jni_zdataInstanceFind(path, deviceId, instanceId, jzway), jzway);
+            this(jni_zdataInstanceFind(path, deviceId, instanceId, jzway));
         }
 
         public Data(String path, int deviceId, int instanceId, int commandClassId) throws NotFound, Exception {
-            this(jni_zdataCommandClassFind(path, deviceId, instanceId, commandClassId, jzway), jzway);
+            this(jni_zdataCommandClassFind(path, deviceId, instanceId, commandClassId, jzway));
         }
 
-        private Data(long dh, long jzway) throws NotFound, Exception {
+        private Data(long dh) throws NotFound, Exception {
             if (dh == 0) {
                 throw new NotFound();
             }
@@ -339,7 +338,7 @@ public final class ZWay {
             Data[] children = new Data[length];
             for (int i = 0; i < length; i++) {
                 try {
-                    children[i] = new Data(list[i], jzway);
+                    children[i] = new Data(list[i]);
                 } catch (NotFound e) {
                     // should never happen
                     throw new RuntimeException();
@@ -351,7 +350,7 @@ public final class ZWay {
         public Data get(String path) throws NotAlive, NotFound, Exception {
             isAlive();
             
-            return new Data(path, this.dh, this.jzway);
+            return new Data(path, this.dh);
         }
 
         public Type getValueType() throws NotAlive {
@@ -518,14 +517,11 @@ public final class ZWay {
     }
 
     public final class Controller {
-        private final long jzway;
-        
         public final Data data;
 
-        public Controller(ZWay zway) throws Exception {
-            jzway = zway.jzway;
+        public Controller() throws Exception {
             try {
-                data = new Data("", jzway);
+                data = new Data("");
             } catch (Data.NotFound e) {
                 // should never happen
                 throw new RuntimeException();
@@ -546,18 +542,15 @@ public final class ZWay {
     }
 
     public final class Device {
-        private final long jzway;
-
         public final Integer id;
         public final Data data;
 
         public Map<Integer, Instance> instances;
 
         public Device(ZWay zway, Integer device_id) throws Exception {
-            jzway = zway.jzway;
             id = device_id;
             try {
-                data = new Data("", device_id, jzway);
+                data = new Data("", device_id);
             } catch (Data.NotFound e) {
                 // should never happen
                 throw new RuntimeException();
@@ -566,7 +559,6 @@ public final class ZWay {
         }
 
         public final class Instance {
-            private final long jzway;
             private final Device device;
 
             public final Integer id;
@@ -576,11 +568,10 @@ public final class ZWay {
             public Map<String, CommandClass> commandClassesByName;
             
             public Instance(ZWay zway, Device dev, Integer instance_id) throws Exception {
-                jzway = zway.jzway;
                 device = dev;
                 id = instance_id;
                 try {
-                    data = new Data("", dev.id, instance_id, jzway);
+                    data = new Data("", dev.id, instance_id);
                 } catch (Data.NotFound e) {
                     // should never happen
                     throw new RuntimeException();
@@ -590,13 +581,11 @@ public final class ZWay {
             }
 
             public class CommandClass {
-                private final long jzway;
                 protected final Instance instance;
 
                 public final Data data = null;
                 
                 public CommandClass(ZWay zway, Instance inst) throws Exception {
-                    jzway = zway.jzway;
                     instance = inst;
                 }
             }
@@ -609,7 +598,7 @@ public final class ZWay {
                 public %cc_capitalized_name%(ZWay zway, Instance instance) throws Exception {
                     super(zway, instance);
                     try {
-                        data = new Data("", instance.device.id, instance.id, %cc_id%, jzway);
+                        data = new Data("", instance.device.id, instance.id, %cc_id%);
                     } catch (Data.NotFound e) {
                         // should never happen
                         throw new RuntimeException();
