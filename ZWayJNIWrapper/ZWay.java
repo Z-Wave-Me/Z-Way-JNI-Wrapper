@@ -66,6 +66,7 @@ public final class ZWay {
     }
 
     // Callback stub
+    
     private void successCallback(Object obj) {
         System.out.println("successCallback");
     }
@@ -173,6 +174,7 @@ public final class ZWay {
         public static final int invalidated = 0x02;
         public static final int deleted = 0x03;
         public static final int childCreated = 0x04;
+        
         public static final int Empty = 0;
         public static final int Bool = 1;
         public static final int Int = 2;
@@ -266,11 +268,11 @@ public final class ZWay {
             if (type == updated) {
                 getValue();
             } else if (type == invalidated) {
-                // do later
+                // TODO update invalidate time
             } else if (type == deleted) {
                 // do later
             } else if (type == childCreated) {
-                // do later
+                // nothing to do
             } else {
                 throw new Exception("Type of the event is an invalid integer.");
             }
@@ -298,12 +300,12 @@ public final class ZWay {
                 valueType = Byte[].class;
                 valueTypeStr = "Byte[]";
                 int[] val = jni_zdataGetBinary(dh);
-                value = Arrays.stream( val ).boxed().toArray( Integer[]::new );
+                value = Arrays.stream(val).boxed().toArray( Integer[]::new );
             } else if (dataType == IntArray) {
                 valueType = Integer[].class;
                 valueTypeStr = "Integer[]";
                 int[] val = jni_zdataGetIntArray(dh);
-                value = Arrays.stream( val ).boxed().toArray( Integer[]::new );
+                value = Arrays.stream(val).boxed().toArray( Integer[]::new );
             } else if (dataType == FloatArray) {
                 valueType = Float[].class;
                 valueTypeStr = "Float[]";
