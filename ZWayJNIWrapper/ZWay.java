@@ -196,7 +196,18 @@ public final class ZWay {
 
         public final String path;
 
-        private Boolean isAlive; // TODO implement everywhere where needed
+        private Boolean isAlive;
+        
+        // exceptions
+        
+        public final class NotAlive extends Throwable {
+            public final Data data;
+            
+            public NotAlive(Data data) {
+                super();
+                this.data = data;
+            }
+        }
 
 
         // constructors
@@ -226,6 +237,7 @@ public final class ZWay {
             name = jni_zdataGetName(dh);
             jni_zdataAddCallback(dh);
             path = jni_zdataGetPath(dh);
+            isAlive = true;
             callbacks = new HashSet<>();
             getValue();
         }
@@ -234,6 +246,12 @@ public final class ZWay {
         protected void finalize() throws Throwable {
             jni_zdataRemoveCallback(dh);
         }*/
+
+        private void isAlive() throws NotAlive {
+            if (!isAlive) {
+                throw new NotAlive(this);
+            }
+        }
 
         private void dataCallback(int type, long dh) throws Exception {
             System.out.println("dataCallback: type = " + type);
@@ -246,7 +264,7 @@ public final class ZWay {
             } else if (type == invalidated) {
                 // TODO update invalidate time
             } else if (type == deleted) {
-                // do later
+                isAlive = false;
             } else if (type == childCreated) {
                 // nothing to do
             } else {
@@ -305,7 +323,9 @@ public final class ZWay {
             }
         }
 
-        public Data[] getChildren() throws Exception {
+        public Data[] getChildren() throws NotAlive, Exception {
+            isAlive();
+            
             long[] list = jni_zdataGetChildren(dh);
             int length = list.length;
             Data[] children = new Data[length];
@@ -315,35 +335,51 @@ public final class ZWay {
             return children;
         }
         
-        public Data get(String path) throws Exception {
+        public Data get(String path) throws NotAlive, Exception {
+            isAlive();
+            
             return new Data(path, this.dh, this.jzway);
         }
 
-        public Type getValueType() {
+        public Type getValueType() throws NotAlive {
+            isAlive();
+            
             return valueType;
         }
 
-        public String getValueTypeStr() {
+        public String getValueTypeStr() throws NotAlive {
+            isAlive();
+            
             return valueTypeStr;
         }
 
-        public void setBool(Boolean data) {
+        public void setBool(Boolean data) throws NotAlive {
+            isAlive();
+            
             jni_zdataSetBoolean(dh, data);
         }
 
-        public void setInt(Integer data) {
+        public void setInt(Integer data) throws NotAlive {
+            isAlive();
+            
             jni_zdataSetInteger(dh, data);
         }
 
-        public void setFloat(Float data) {
+        public void setFloat(Float data) throws NotAlive {
+            isAlive();
+            
             jni_zdataSetFloat(dh, data);
         }
 
-        public void setString(String data) {
+        public void setString(String data) throws NotAlive {
+            isAlive();
+            
             jni_zdataSetString(dh, data, false); // TODO what is copy is it always false?
         }
 
-        public void setByteList(Integer[] data) {
+        public void setByteList(Integer[] data) throws NotAlive {
+            isAlive();
+            
             int size = data.length;
             int[] rdata = new int[size];
             for (int i = 0; i < size; i++) {
@@ -352,7 +388,9 @@ public final class ZWay {
             jni_zdataSetBinary(dh, rdata, size, false);
         }
 
-        public void setIntList(Integer[] data) {
+        public void setIntList(Integer[] data) throws NotAlive {
+            isAlive();
+            
             int size = data.length;
             int[] rdata = new int[size];
             for (int i = 0; i < size; i++) {
@@ -361,7 +399,9 @@ public final class ZWay {
             jni_zdataSetIntArray(dh, rdata, size);
         }
 
-        public void setFloatList(Float[] data) {
+        public void setFloatList(Float[] data) throws NotAlive {
+            isAlive();
+            
             int size = data.length;
             float[] rdata = new float[size];
             for (int i = 0; i < size; i++) {
@@ -370,16 +410,22 @@ public final class ZWay {
             jni_zdataSetFloatArray(dh, rdata, size);
         }
 
-        public void setStringList(String[] data) {
+        public void setStringList(String[] data) throws NotAlive {
+            isAlive();
+            
             int size = data.length;
             jni_zdataSetStringArray(dh, data, size, false);
         }
 
-        public void setNull() {
+        public void setNull() throws NotAlive {
+            isAlive();
+            
             jni_zdataSetEmpty(dh);
         }
 
-        public Boolean getBool() {
+        public Boolean getBool() throws NotAlive {
+            isAlive();
+            
             if (valueType == Boolean.class && valueTypeStr.equals("Boolean")) {
                 return (Boolean) value;
             } else {
@@ -387,7 +433,9 @@ public final class ZWay {
             }
         }
 
-        public Integer getInt() {
+        public Integer getInt() throws NotAlive {
+            isAlive();
+            
             if (valueType == Integer.class && valueTypeStr.equals("Integer")) {
                 return (Integer) value;
             } else {
@@ -395,7 +443,9 @@ public final class ZWay {
             }
         }
 
-        public Float getFloat() {
+        public Float getFloat() throws NotAlive {
+            isAlive();
+            
             if (valueType == Float.class && valueTypeStr.equals("Float")) {
                 return (Float) value;
             } else {
@@ -403,7 +453,9 @@ public final class ZWay {
             }
         }
 
-        public String getString() {
+        public String getString() throws NotAlive {
+            isAlive();
+            
             if (valueType == String.class && valueTypeStr.equals("String")) {
                 return (String) value;
             } else {
@@ -411,7 +463,9 @@ public final class ZWay {
             }
         }
 
-        public Integer[] getByteList() {
+        public Integer[] getByteList() throws NotAlive {
+            isAlive();
+            
             if (valueType == Byte[].class && valueTypeStr.equals("Byte[]")) {
                 return (Integer[]) value;
             } else {
@@ -419,7 +473,9 @@ public final class ZWay {
             }
         }
 
-        public Integer[] getIntList() {
+        public Integer[] getIntList() throws NotAlive {
+            isAlive();
+            
             if (valueType == Integer[].class && valueTypeStr.equals("Integer[]")) {
                 return (Integer[]) value;
             } else {
@@ -427,7 +483,9 @@ public final class ZWay {
             }
         }
 
-        public Float[] getFloatList() {
+        public Float[] getFloatList() throws NotAlive {
+            isAlive();
+            
             if (valueType == Float[].class && valueTypeStr.equals("Float[]")) {
                 return (Float[]) value;
             } else {
@@ -435,7 +493,9 @@ public final class ZWay {
             }
         }
 
-        public String[] getStringList() {
+        public String[] getStringList() throws NotAlive {
+            isAlive();
+            
             if (valueType == String[].class && valueTypeStr.equals("String[]")) {
                 return (String[]) value;
             } else {
