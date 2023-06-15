@@ -186,9 +186,7 @@ public final class ZWay {
         public static final int StringArray = 8;
 
         private Object value;
-        // is equal to Integer.class when is null
         private Type valueType;
-        // is equal to "Integer" when is null
         private String valueTypeStr;
 
         private long dh;
@@ -352,37 +350,22 @@ public final class ZWay {
         }
 
         public void setBool(Boolean data) {
-            value = data;
-            valueType = Boolean.class;
-            valueTypeStr = "Boolean";
             jni_zdataSetBoolean(dh, data);
         }
 
         public void setInt(Integer data) {
-            value = data;
-            valueType = Integer.class;
-            valueTypeStr = "Integer";
             jni_zdataSetInteger(dh, data);
         }
 
         public void setFloat(Float data) {
-            value = data;
-            valueType = Float.class;
-            valueTypeStr = "Float";
             jni_zdataSetFloat(dh, data);
         }
 
         public void setString(String data) {
-            value = data;
-            valueType = String.class;
-            valueTypeStr = "String";
             jni_zdataSetString(dh, data, false); // TODO what is copy is it always false?
         }
 
         public void setByteList(Integer[] data) {
-            value = data;
-            valueType = Byte[].class;
-            valueTypeStr = "Byte[]";
             int size = data.length;
             int[] rdata = new int[size];
             for (int i = 0; i < size; i++) {
@@ -392,9 +375,6 @@ public final class ZWay {
         }
 
         public void setIntList(Integer[] data) {
-            value = data;
-            valueType = Integer[].class;
-            valueTypeStr = "Integer[]";
             int size = data.length;
             int[] rdata = new int[size];
             for (int i = 0; i < size; i++) {
@@ -404,9 +384,6 @@ public final class ZWay {
         }
 
         public void setFloatList(Float[] data) {
-            value = data;
-            valueType = Float[].class;
-            valueTypeStr = "Float[]";
             int size = data.length;
             float[] rdata = new float[size];
             for (int i = 0; i < size; i++) {
@@ -416,17 +393,11 @@ public final class ZWay {
         }
 
         public void setStringList(String[] data) {
-            value = data;
-            valueType = String[].class;
-            valueTypeStr = "String[]";
             int size = data.length;
             jni_zdataSetStringArray(dh, data, size, false);
         }
 
         public void setNull() {
-            value = null;
-            valueType = Object.class;
-            valueTypeStr = "Null";
             jni_zdataSetEmpty(dh);
         }
 
