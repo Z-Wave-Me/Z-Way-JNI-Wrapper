@@ -198,57 +198,35 @@ public final class ZWay {
 
         private Boolean isAlive; // TODO implement everywhere where needed
 
-        public Data(String path, long dhParent, long jzway) throws Exception {
-            this.jzway = jzway;
-            dh = jni_zdataFind(dhParent, path, jzway);
-            name = jni_zdataGetName(dh);
-            this.path = jni_zdataGetPath(dh);
-            jni_zdataAddCallback(dh);
-            getValue();
+
+        // constructors
+        
+        public Data(String path, long dhParent) throws Exception {
+            this(jni_zdataFind(dhParent, path, jzway), jzway);
         }
 
-        public Data(String path, long jzway) throws Exception {
-            this.jzway = jzway;
-            dh = jni_zdataControllerFind(path, jzway);
-            name = jni_zdataGetName(dh);
-            this.path = jni_zdataGetPath(dh);
-            jni_zdataAddCallback(dh);
-            getValue();
+        public Data(String path) throws Exception {
+            this(jni_zdataControllerFind(path, jzway), jzway);
         }
 
-        public Data(String path, int deviceId, long jzway) throws Exception {
-            this.jzway = jzway;
-            dh = jni_zdataDeviceFind(path, deviceId, jzway);
-            name = jni_zdataGetName(dh);
-            this.path = jni_zdataGetPath(dh);
-            jni_zdataAddCallback(dh);
-            getValue();
+        public Data(String path, int deviceId) throws Exception {
+            this(jni_zdataDeviceFind(path, deviceId, jzway), jzway);
         }
 
-        public Data(String path, int deviceId, int instanceId, long jzway) throws Exception {
-            this.jzway = jzway;
-            dh = jni_zdataInstanceFind(path, deviceId, instanceId, jzway);
-            name = jni_zdataGetName(dh);
-            this.path = jni_zdataGetPath(dh);
-            jni_zdataAddCallback(dh);
-            getValue();
+        public Data(String path, int deviceId, int instanceId) throws Exception {
+            this(jni_zdataInstanceFind(path, deviceId, instanceId, jzway), jzway);
         }
 
-        public Data(String path, int deviceId, int instanceId, int commandClassId, long jzway) throws Exception {
-            this.jzway = jzway;
-            dh = jni_zdataCommandClassFind(path, deviceId, instanceId, commandClassId, jzway);
-            name = jni_zdataGetName(dh);
-            this.path = jni_zdataGetPath(dh);
-            jni_zdataAddCallback(dh);
-            getValue();
+        public Data(String path, int deviceId, int instanceId, int commandClassId) throws Exception {
+            this(jni_zdataCommandClassFind(path, deviceId, instanceId, commandClassId, jzway), jzway);
         }
 
         private Data(long dh, long jzway) throws Exception {
-            this.jzway = jzway;
             this.dh = dh;
             name = jni_zdataGetName(dh);
-            this.path = jni_zdataGetPath(dh);
             jni_zdataAddCallback(dh);
+            path = jni_zdataGetPath(dh);
+            callbacks = new HashSet<>();
             getValue();
         }
         
