@@ -223,7 +223,7 @@ static jlong jni_zdata_find(JNIEnv *env, jobject obj, jlong dh, jstring path, jl
     str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
-    jzdata->dh = zdata_find((ZDataHolder)dh, str_path);
+    jzdata->dh = zdata_find(((JZData)dh)->dh, str_path);
     zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
 
     (*env)->ReleaseStringUTFChars(env, path, str_path);
