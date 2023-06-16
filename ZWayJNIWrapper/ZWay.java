@@ -264,11 +264,6 @@ public final class ZWay {
             }
         }
 
-        private void init() {
-            // here we will let the C part save this object
-            jni_zdataAddCallback(dh);
-        }
-        
         private void isAlive() throws NotAlive {
             if (!isAlive) {
                 throw new NotAlive(this);
