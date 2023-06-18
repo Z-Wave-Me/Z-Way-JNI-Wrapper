@@ -394,7 +394,7 @@ public final class ZWay {
         public void setString(String data) throws NotAlive {
             isAlive();
             
-            jni_zdataSetString(dh, data, true);
+            jni_zdataSetString(dh, data);
         }
 
         public void setByteList(Integer[] data) throws NotAlive {
@@ -405,7 +405,7 @@ public final class ZWay {
             for (int i = 0; i < size; i++) {
                 rdata[i] = data[i];
             }
-            jni_zdataSetBinary(dh, rdata, size, false);
+            jni_zdataSetBinary(dh, rdata);
         }
 
         public void setIntList(Integer[] data) throws NotAlive {
@@ -416,7 +416,7 @@ public final class ZWay {
             for (int i = 0; i < size; i++) {
                 rdata[i] = data[i];
             }
-            jni_zdataSetIntArray(dh, rdata, size);
+            jni_zdataSetIntArray(dh, rdata);
         }
 
         public void setFloatList(Float[] data) throws NotAlive {
@@ -427,14 +427,13 @@ public final class ZWay {
             for (int i = 0; i < size; i++) {
                 rdata[i] = data[i];
             }
-            jni_zdataSetFloatArray(dh, rdata, size);
+            jni_zdataSetFloatArray(dh, rdata);
         }
 
         public void setStringList(String[] data) throws NotAlive {
             isAlive();
-            
-            int size = data.length;
-            jni_zdataSetStringArray(dh, data, size, false);
+
+            jni_zdataSetStringArray(dh, data);
         }
 
         public void setEmpty() throws NotAlive {
@@ -540,11 +539,11 @@ public final class ZWay {
         private native void jni_zdataSetBoolean(long dh, boolean data);
         private native void jni_zdataSetInteger(long dh, int data);
         private native void jni_zdataSetFloat(long dh, float data);
-        private native void jni_zdataSetString(long dh, String data, boolean copy);
-        private native void jni_zdataSetBinary(long dh, int[] data, int length, boolean copy);
-        private native void jni_zdataSetIntArray(long dh, int[] data, int length);
-        private native void jni_zdataSetFloatArray(long dh, float[] data, int length);
-        private native void jni_zdataSetStringArray(long dh, String[] data, int length, boolean copy);
+        private native void jni_zdataSetString(long dh, String data);
+        private native void jni_zdataSetBinary(long dh, int[] data);
+        private native void jni_zdataSetIntArray(long dh, int[] data);
+        private native void jni_zdataSetFloatArray(long dh, float[] data);
+        private native void jni_zdataSetStringArray(long dh, String[] data);
         private native long[] jni_zdataGetChildren(long dh);
         private native String jni_zdataGetPath(long dh);
     }

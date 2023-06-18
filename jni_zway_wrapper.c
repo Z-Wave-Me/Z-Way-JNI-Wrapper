@@ -217,8 +217,7 @@ static jlong jni_zdata_find(JNIEnv *env, jobject obj, jlong dh, jstring path, jl
     jzdata->jzway = (JZWay)jzway;
     jzdata->self = NULL;
 
-    const char *str_path;
-    str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
+    const char *str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     jzdata->dh = zdata_find(((JZData)dh)->dh, str_path);
@@ -234,8 +233,7 @@ static jlong jni_zdata_controller_find(JNIEnv *env, jobject obj, jstring path, j
     jzdata->jzway = (JZWay)jzway;
     jzdata->self = NULL;
 
-    const char *str_path;
-    str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
+    const char *str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     jzdata->dh = zway_find_controller_data(jzdata->jzway->zway, str_path);
@@ -251,8 +249,7 @@ static jlong jni_zdata_device_find(JNIEnv *env, jobject obj, jstring path, jint 
     jzdata->jzway = (JZWay)jzway;
     jzdata->self = NULL;
 
-    const char *str_path;
-    str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
+    const char *str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     jzdata->dh = zway_find_device_data(jzdata->jzway->zway, device_id, str_path);
@@ -268,8 +265,7 @@ static jlong jni_zdata_instance_find(JNIEnv *env, jobject obj, jstring path, jin
     jzdata->jzway = (JZWay)jzway;
     jzdata->self = NULL;
 
-    const char *str_path;
-    str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
+    const char *str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     jzdata->dh = zway_find_device_instance_data(jzdata->jzway->zway, device_id, instance_id, str_path);
@@ -285,8 +281,7 @@ static jlong jni_zdata_command_class_find(JNIEnv *env, jobject obj, jstring path
     jzdata->jzway = (JZWay)jzway;
     jzdata->self = NULL;
 
-    const char *str_path;
-    str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
+    const char *str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     jzdata->dh = zway_find_device_instance_cc_data(jzdata->jzway->zway, device_id, instance_id, command_class_id, str_path);
@@ -598,10 +593,26 @@ static jobjectArray jni_zdata_get_stringArray(JNIEnv *env, jobject obj, jlong dh
     return stringArray;
 }
 
-// set by types
-/*
+// zdata value: set by type
+static void jni_zdata_set_empty(JNIEnv *env, jobject obj, jlong dh) {
+    (void)obj;
+    (void)env;
+
+    JZData jzdata = (JZData)dh;
+
+    zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
+    ZWError err = zdata_set_empty(jzdata->dh);
+    zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+
 static void jni_zdata_set_boolean(JNIEnv *env, jobject obj, jlong dh, jboolean data) {
     (void)obj;
+    (void)env;
 
     JZData jzdata = (JZData)dh;
 
@@ -616,6 +627,7 @@ static void jni_zdata_set_boolean(JNIEnv *env, jobject obj, jlong dh, jboolean d
 
 static void jni_zdata_set_integer(JNIEnv *env, jobject obj, jlong dh, jint data) {
     (void)obj;
+    (void)env;
 
     JZData jzdata = (JZData)dh;
 
@@ -630,6 +642,7 @@ static void jni_zdata_set_integer(JNIEnv *env, jobject obj, jlong dh, jint data)
 
 static void jni_zdata_set_float(JNIEnv *env, jobject obj, jlong dh, jfloat data) {
     (void)obj;
+    (void)env;
 
     JZData jzdata = (JZData)dh;
 
@@ -642,15 +655,16 @@ static void jni_zdata_set_float(JNIEnv *env, jobject obj, jlong dh, jfloat data)
     }
 }
 
-static void jni_zdata_set_string(JNIEnv *env, jobject obj, jlong dh, jstring data, jboolean copy) {
+static void jni_zdata_set_string(JNIEnv *env, jobject obj, jlong dh, jstring data) {
     (void)obj;
+    (void)env;
 
     JZData jzdata = (JZData)dh;
 
-    char *str_data = (*env)->GetStringUTFChars(env, data, JNI_FALSE);
+    const char *str_data = (*env)->GetStringUTFChars(env, data, JNI_FALSE);
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
-    ZWError err = zdata_set_string(jzdata->dh, (ZWCSTR) str_data, copy);
+    ZWError err = zdata_set_string(jzdata->dh, (ZWCSTR) str_data, TRUE);
     zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
 
     if (err != NoError) {
@@ -658,86 +672,102 @@ static void jni_zdata_set_string(JNIEnv *env, jobject obj, jlong dh, jstring dat
     }
 }
 
-static void jni_zdata_set_binary(JNIEnv *env, jobject obj, jlong dh, jintArray data, jint length, jboolean copy) {
+static void jni_zdata_set_binary(JNIEnv *env, jobject obj, jlong dh, jintArray data) {
     (void)obj;
+    (void)env;
 
     JZData jzdata = (JZData)dh;
 
-    int *cdata[length];
+    jint *c_int_data = (*env)->GetIntArrayElements(env, data, NULL);
+    jsize length = (*env)->GetArrayLength(env, data);
+    
+    ZWBYTE *c_byte_data = (ZWBYTE *)malloc(length);
+    
     for (int i = 0; i < length; i++) {
-        cdata[i] = data[i];
+        c_byte_data[i] = (ZWBYTE)c_int_data[i];
     }
-
+    
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
-    ZWError err = zdata_set_binary(jzdata->dh, (const ZWBYTE *)cdata, length, copy);
+    ZWError err = zdata_set_binary(jzdata->dh, (const ZWBYTE *)c_byte_data, length, TRUE);
     zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
+
+    free(c_byte_data);
+    (*env)->ReleaseIntArrayElements(env, data, c_int_data, 0);
 
     if (err != NoError) {
         JNI_THROW_EXCEPTION();
     }
 }
 
-static void jni_zdata_set_int_array(JNIEnv *env, jobject obj, jlong dh, jintArray data, jint length) {
+static void jni_zdata_set_intArray(JNIEnv *env, jobject obj, jlong dh, jintArray data) {
     (void)obj;
+    (void)env;
 
     JZData jzdata = (JZData)dh;
 
-    int *cdata[length];
-    for (int i = 0; i < length; i++) {
-        cdata[i] = data[i];
-    }
+    jint *cdata = (*env)->GetIntArrayElements(env, data, NULL);
+    jsize length = (*env)->GetArrayLength(env, data);
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     ZWError err = zdata_set_integer_array(jzdata->dh, cdata, length);
     zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
 
+    (*env)->ReleaseIntArrayElements(env, data, cdata, 0);
+
     if (err != NoError) {
         JNI_THROW_EXCEPTION();
     }
 }
 
-static void jni_zdata_set_float_array(JNIEnv *env, jobject obj, jlong dh, jfloatArray data, jint length) {
+static void jni_zdata_set_floatArray(JNIEnv *env, jobject obj, jlong dh, jfloatArray data) {
     (void)obj;
+    (void)env;
 
     JZData jzdata = (JZData)dh;
 
-    float *cdata[length];
-    for (int i = 0; i < length; i++) {
-        cdata[i] = data[i];
-    }
+    jfloat *cdata = (*env)->GetFloatArrayElements(env, data, NULL);
+    jsize length = (*env)->GetArrayLength(env, data);
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     ZWError err = zdata_set_float_array(jzdata->dh, cdata, length);
     zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
 
+    (*env)->ReleaseFloatArrayElements(env, data, cdata, 0);
+
     if (err != NoError) {
         JNI_THROW_EXCEPTION();
     }
 }
 
-static void jni_zdata_set_string_array(JNIEnv *env, jobject obj, jlong dh, jobjectArray data, jint length, jboolean copy) {
+static void jni_zdata_set_stringArray(JNIEnv *env, jobject obj, jlong dh, jobjectArray data) {
     (void)obj;
+    (void)env;
 
     JZData jzdata = (JZData)dh;
-    jstring str;
-    char ** cstr;
 
-    char **cdata[length];
+    jsize length = (*env)->GetArrayLength(env, data);
+
+    ZWSTR cdata[length];
+    jstring str[length];
+    
     for (int i = 0; i < length; i++) {
-        str = *data[i];
-        cstr = (*env)->GetStringUTFChars(env, str, JNI_FALSE);
-        cdata[i] = (ZWCSTR) cstr;
+        str[i] = (*env)->GetObjectArrayElement(env, data, i);
+        cdata[i] = (ZWSTR) (*env)->GetStringUTFChars(env, str[i], JNI_FALSE);
     }
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
-    ZWError err = zdata_set_string_array(jzdata->dh, cdata, length, copy);
+    ZWError err = zdata_set_string_array(jzdata->dh, (ZWCSTR*) cdata, length, TRUE);
     zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
+
+    for (int i = 0; i < length; i++) {
+        (*env)->ReleaseStringUTFChars(env, str[i], cdata[i]);
+    }
+
 
     if (err != NoError) {
         JNI_THROW_EXCEPTION();
     }
 }
-*/
 
 // Callback stubs
 
@@ -862,6 +892,15 @@ static JNINativeMethod funcsData[] = {
     { "jni_zdataGetIntArray", "(J)[I", (void *)&jni_zdata_get_intArray },
     { "jni_zdataGetFloatArray", "(J)[F", (void *)&jni_zdata_get_floatArray },
     { "jni_zdataGetStringArray", "(J)[Ljava/lang/String;", (void *)&jni_zdata_get_stringArray },
+    { "jni_zdataSetEmpty", "(J)V", (void *)&jni_zdata_set_empty },
+    { "jni_zdataSetBoolean", "(JZ)V", (void *)&jni_zdata_set_boolean },
+    { "jni_zdataSetInteger", "(JI)V", (void *)&jni_zdata_set_integer },
+    { "jni_zdataSetFloat", "(JF)V", (void *)&jni_zdata_set_float },
+    { "jni_zdataSetString", "(JLjava/lang/String;)V", (void *)&jni_zdata_set_string },
+    { "jni_zdataSetBinary", "(J[I)V", (void *)&jni_zdata_set_binary },
+    { "jni_zdataSetIntArray", "(J[I)V", (void *)&jni_zdata_set_intArray },
+    { "jni_zdataSetFloatArray", "(J[F)V", (void *)&jni_zdata_set_floatArray },
+    { "jni_zdataSetStringArray", "(J[Ljava/lang/String;)V", (void *)&jni_zdata_set_stringArray },
 };
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
