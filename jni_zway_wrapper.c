@@ -586,7 +586,7 @@ static jobjectArray jni_zdata_get_stringArray(JNIEnv *env, jobject obj, jlong dh
 
     jobjectArray stringArray = (*env)->NewObjectArray(env, (jsize)length, (*env)->FindClass(env, "java/lang/String"), (*env)->NewStringUTF(env, ""));
     for (int i = 0; i < length; i++) {
-        (*env)->SetObjectArrayElement(env, stringArray, length, /*(char*)(str_list_ret[i])*/ (*env)->NewStringUTF(env, (char*)ret[i]));
+        (*env)->SetObjectArrayElement(env, stringArray, i, (*env)->NewStringUTF(env, (char*)ret[i]));
         TODO(jni_zdata_get_stringArray)
     }
 
