@@ -1,7 +1,5 @@
 import ZWayJNIWrapper.*;
 
-import java.lang.reflect.Type;
-
 class Main {
     public static void main(String[] args) throws InterruptedException {
         ZWay zway = init();
