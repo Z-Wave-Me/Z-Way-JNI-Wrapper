@@ -122,8 +122,8 @@ The full list of methods is listed in the manual [Z-Way manual](https://z-wave.m
 
 ## Error handling
 
-`ZWay.Data.NotFound` is raised when data is not found.
-`ZWay.Data.NotAlive` data object was deleted in the underlying library and is not valid anymore
+* `ZWay.Data.NotFound` is raised when data is not found.
+* `ZWay.Data.NotAlive` data object was deleted in the underlying library and is not valid anymore
 
 # Building
 
