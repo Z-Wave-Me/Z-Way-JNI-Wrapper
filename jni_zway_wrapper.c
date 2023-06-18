@@ -773,8 +773,6 @@ static void dataCallback(const ZWay zway, ZWDataChangeType type, ZDataHolder dh,
     (void)zway;
 
     JZData jzdata = (JZData)arg;
-printf("Cbk dh self = %p, jzdata = %p\n", jzdata->self, jzdata);
-printf("jdh = %p, dh = %p, dh = %p\n", jzdata, dh, jzdata->dh);
     JNIEnv* env;
     (*(jzdata->jzway->jvm))->AttachCurrentThread(jzdata->jzway->jvm, (void**) &env, NULL);
     (*env)->CallVoidMethod(env, jzdata->self, jzdata->jzway->dataCallbackID, type);

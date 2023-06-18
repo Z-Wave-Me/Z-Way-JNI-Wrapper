@@ -289,7 +289,6 @@ public final class ZWay {
         }
         
         private void dataCallback(int type) throws Exception {
-            System.out.println("dataCallback: type = " + type);
             // get type of the event
             boolean isPhantom = (phantomUpdate & type) > 0;
             boolean isChild = (childEvent & type) > 0;
