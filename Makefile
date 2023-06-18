@@ -2,6 +2,7 @@
 TARGET = libjzway
 TARGET_DIR = $(TARGET)
 TARGET_SO = $(TARGET_DIR)/$(TARGET).so
+TARGET_PKG = ZWayJNIWrapper
 
 # Z-Way
 ZWAY_ROOT = z-way-root
@@ -45,7 +46,7 @@ prepare:
 	python2 autogenerate_code.py 
 	
 clean:
-	rm -f *.o *.class $(TARGET_SO) $(TARGET_DIR)/* hs_err_pid*.log
+	rm -f *.o *.class $(TARGET_PKG)/*.class $(TARGET_SO) $(TARGET_DIR)/* hs_err_pid*.log
 	python2 autogenerate_code.py clean
 
 copy:
