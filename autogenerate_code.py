@@ -30,9 +30,11 @@ class Param:
         self.default = None
         self.description = []
         self.type = None
+        self.isLength = False
+        self.dataName = None
     
     def __repr__(self):
-        return "{%s, %s, %s, %s}" % (self.name, self.type, self.default, self.description)
+        return "{%s, %s, %s, %s, %s}" % (self.name, self.type, self.default, self.description, "isLength" if self.isLength else "")
 
 class Params(list):
     def Add(self, param):
@@ -50,60 +52,45 @@ def IsWithLength(params, i):
                 return True
         return False
 
-# Return type of C++ object based on C type
-def GetParamType(type):
-        if type == 'const ZWBYTE *' or type == 'ZWBYTE *':
-                return 'ByteArray'
-        if type == 'const ZWNODE *' or type == 'ZWNODE *':
-                return 'IntArray'
-        if type == 'ZWCSTR':
-                return 'NativeString'
-        return type
-
 # Return mangling string for parameter value transmited to C call
-def GetParamValueMangling(type):
+def GetParamValueMangling(param):
+        name = param.name
+        type = param.type
+        isLength = param.isLength
+        dataName = param.dataName
         if type == 'const ZWBYTE *' or type == 'ZWBYTE *':
-                return '%s.ptr()'
+                return 'c_byte_%(name)s' % {'name': name}
         if type == 'const ZWNODE *' or type == 'ZWNODE *':
-                return '%s.ptr()'
+                return 'c_int_%(name)s' % {'name': name}
         if type == 'ZWCSTR':
-                return '%s.ptr()'
-        return '%s'
+                return 'c_str_%(name)s' % {'name': name}
+        if isLength:
+                return 'c_length_%(name)s' % {'name': dataName}
+        return name
 
-# Return default value of C++ variable
-def GetParamDefaultValue(type, value):
+# Return parser for Java parameter to transform it to C object
+def GetParamParser(param):
+        name = param.name
+        type = param.type
         if type == 'const ZWBYTE *' or type == 'ZWBYTE *':
-                return 'ByteArray()'
+                return 'jint *c_int_%(name)s = (*env)->GetIntArrayElements(env, %(name)s, NULL); jsize c_length_%(name)s = (*env)->GetArrayLength(env, %(name)s); ZWBYTE *c_byte_%(name)s = (ZWBYTE *)malloc(c_length_%(name)s); for (int i = 0; i < c_length_%(name)s; i++) c_byte_%(name)s[i] = (ZWBYTE)c_int_%(name)s[i];' % {'name': name}
         if type == 'const ZWNODE *' or type == 'ZWNODE *':
-                return 'IntArray()'
+                return 'jint *c_int_%(name)s = (*env)->GetIntArrayElements(env, %(name)s, NULL); jsize c_length_%(name)s = (*env)->GetArrayLength(env, %(name)s);' % {'name': name}
         if type == 'ZWCSTR':
-                return 'NativeString()'
-        return value
+                return 'const char *c_str_%(name)s = (*env)->GetStringUTFChars(env, %(name)s, JNI_FALSE);' % {'name': name}
+        return ''
 
-# Return parser for Java parameter to transform it to C++ object
-def GetParamParser(type, name, i):
-        if type == 'ZWBOOL':
-                return '(ZWBOOL) info[%i]->BooleanValue()' % i
-        if type == 'ZJobCustomCallback' and name == 'successCallback':
-                return 'zwayContext->GetSuccessCallback(callbackId, info[%i])' % i
-        if type == 'ZJobCustomCallback' and name == 'failureCallback':
-                return 'zwayContext->GetFailureCallback(callbackId, info[%i])' % i
-        if type == 'unsigned short' or type == 'unsigned short int' or type == 'unsigned int' or type == 'int' or type == 'speed_t' or type == 'ZWBYTE' or type == 'ZWNODE':
-                return '(%s) info[%i]->IntegerValue()' % (type, i)
+# Return releas after parser for Java parameter to transform it to C object
+def GetParamParserRelease(param):
+        name = param.name
+        type = param.type
         if type == 'const ZWBYTE *' or type == 'ZWBYTE *':
-                return 'ByteArray(info[%i])' % i
+                return 'free(c_byte_%(name)s); (*env)->ReleaseIntArrayElements(env, %(name)s, c_int_%(name)s, 0);' % {'name': name}
         if type == 'const ZWNODE *' or type == 'ZWNODE *':
-                return 'IntArray(info[%i])' % i
+                return '(*env)->ReleaseIntArrayElements(env, %(name)s, c_int_%(name)s, 0);' % {'name': name}
         if type == 'ZWCSTR':
-                return 'NativeString(info[%i])' % i
-        if type == 'float':
-                return '(float) info[%i]->NumberValue()' % i
-        if type == 'time_t':
-                return '(time_t) info[%i]->Uint32Value()' % i
-        if type == 'size_t':
-                return '(_t) info[%i]->Uint32Value()' % i
-
-        raise ValueError("")
+                return ''
+        return ''
 
 def GetParamJNIDeclaration(param):
         type = param.type
@@ -112,9 +99,9 @@ def GetParamJNIDeclaration(param):
         elif type == 'unsigned short' or type == 'unsigned short int' or type == 'unsigned int' or type == 'int' or type == 'speed_t' or type == 'ZWBYTE' or type == 'ZWNODE':
                 jtype = 'jint'
         elif type == 'const ZWBYTE *' or type == 'ZWBYTE *':
-                jtype = 'jlong' # ???
+                jtype = 'jintArray'
         elif type == 'const ZWNODE *' or type == 'ZWNODE *':
-                jtype = 'jlong' # ???
+                jtype = 'jintArray'
         elif type == 'ZWCSTR':
                 jtype = 'jstring'
         elif type == 'float':
@@ -134,11 +121,11 @@ def GetParamJavaDeclaration(param):
         elif type == 'unsigned short' or type == 'unsigned short int' or type == 'unsigned int' or type == 'int' or type == 'speed_t' or type == 'ZWBYTE' or type == 'ZWNODE':
                 jtype = 'int'
         elif type == 'const ZWBYTE *' or type == 'ZWBYTE *':
-                jtype = 'long' # TODO
+                jtype = 'int[]'
         elif type == 'const ZWNODE *' or type == 'ZWNODE *':
-                jtype = 'long' # TODO
+                jtype = 'int[]'
         elif type == 'ZWCSTR':
-                jtype = 'string'
+                jtype = 'String'
         elif type == 'float':
                 jtype = 'float'
         elif type == 'time_t':
@@ -156,9 +143,9 @@ def GetParamSignature(param):
         if type == 'unsigned short' or type == 'unsigned short int' or type == 'unsigned int' or type == 'int' or type == 'speed_t' or type == 'ZWBYTE' or type == 'ZWNODE':
                 return 'I'
         if type == 'const ZWBYTE *' or type == 'ZWBYTE *':
-                return '?' # TODO
+                return '[I'
         if type == 'const ZWNODE *' or type == 'ZWNODE *':
-                return '?' # TODO
+                return '[I'
         if type == 'ZWCSTR':
                 return 'Ljava/lang/String;'
         if type == 'float':
@@ -169,6 +156,9 @@ def GetParamSignature(param):
                 return 'J'
         
         raise ValueError("Error parsing parameter " + str(param))
+
+def IsParamNotLength(p):
+        return not p.isLength
 
 # Translate C parameter names into Java
 
@@ -263,11 +253,14 @@ def ParseCC():
                             except:
                                 raise ValueError("%s: Can not match parameter %s in [%s]" % (funcCName, p[1], ', '.join(map(lambda x: x.name, paramsDescriptions))))
 
-                        if funcCName in ["zway_cc_proprietary_set", "zway_cc_thermostat_mode_set_manufacturer_specific", "zway_cc_user_code_set_raw", "zway_cc_user_code_master_code_set_raw", "zway_cc_indicator_set_multiple", "zway_cc_firmware_update_perform", "zway_cc_firmware_update_activation", "zway_cc_switch_color_set_multiple", "zway_cc_security_inject", "zway_cc_security_s2_inject", "zway_cc_node_naming_set_name", "zway_cc_node_naming_set_location", "zway_cc_user_code_set", "zway_cc_user_code_master_code_set"]:
-                                continue # TODO remove this
-
                         cmd = Command(funcCName)
                         cmd.params = paramsDescriptions
+                        
+                        for i in range(0, len(paramsDescriptions)):
+                                if i != len(paramsDescriptions) - 1 and IsWithLength(paramsDescriptions, i):
+                                        cmd.params[i].isLength = True
+                                        cmd.params[i].dataName = cmd.params[i + 1].name
+                        
                         commandClasses[-1].commands.append(cmd)
 
         ccDefinition.close()
@@ -340,11 +333,14 @@ def GenerateCodeCCLine(line, cc, cmd = None):
                 .replace("%function_short_camel_case_name%", CamelCase(cmd.name.replace("zway_cc_", "")))
                 .replace("%function_short_capitalized_name%", CapitalizedCase(cmd.name.replace("zway_cc_", "")))
                 .replace("%function_command_camel_name%", CamelCase(CapitalizedCase(cmd.name.replace("zway_cc_", "")).replace(CapitalizedCase(cc.name), "")))
-                .replace("%params%", "".join(map(lambda p: p.name + ", ", cmd.params)))
-                .replace("%params_jni_declarations%", "".join(map(GetParamJNIDeclaration, cmd.params)))
-                .replace("%params_java_declarations%", "".join(map(GetParamJavaDeclaration, cmd.params)))
-                .replace("%params_java_declarations_no_comma%", "".join(map(GetParamJavaDeclaration, cmd.params))[:-2])
-                .replace("%params_signature%", "".join(map(GetParamSignature, cmd.params)))
+                .replace("%params_c%", "".join(map(lambda p: GetParamValueMangling(p) + ", ", cmd.params)))
+                .replace("%params_java%", "".join(map(lambda p: p.name + ", ", filter(IsParamNotLength, cmd.params))))
+                .replace("%params_jni_declarations%", "".join(map(GetParamJNIDeclaration, filter(IsParamNotLength, cmd.params))))
+                .replace("%params_java_declarations%", "".join(map(GetParamJavaDeclaration, filter(IsParamNotLength, cmd.params))))
+                .replace("%params_java_declarations_no_comma%", "".join(map(GetParamJavaDeclaration, filter(IsParamNotLength, cmd.params)))[:-2])
+                .replace("%params_signature%", "".join(map(GetParamSignature, filter(IsParamNotLength, cmd.params))))
+                .replace("%params_parser%", "".join(map(GetParamParser, filter(IsParamNotLength, cmd.params))))
+                .replace("%params_parser_release%", "".join(map(GetParamParserRelease, filter(IsParamNotLength, cmd.params))))
         )
         
         return line
