@@ -138,7 +138,7 @@ public final class ZWay {
     private native long jni_zdataDeviceFind(String path, int deviceId, long jzway);
     private native long jni_zdataInstanceFind(String path, int deviceId, int instanceId, long jzway);
     private native long jni_zdataCommandClassFind(String path, int deviceId, int instanceId, int commandClassId, long jzway);
-    private native void jni_zdataAddCallback(long dh);
+    private native void jni_zdataAddCallback(Object self, long dh);
     private native void jni_zdataRemoveCallback(long dh);
     private native String jni_zdataGetName(long data);
     private native int jni_zdataGetType(long dh);
@@ -268,10 +268,10 @@ public final class ZWay {
             if (!isAlive) {
                 throw new NotAlive(this);
             }
-            
+
             if (!isMonitored) {
                 // here we will let the C part save `this` object (it was not available in the contructor yet)
-                jni_zdataAddCallback(dh);
+                jni_zdataAddCallback(this, dh);
                 isMonitored = true;
             }
         }

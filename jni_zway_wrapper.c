@@ -297,15 +297,14 @@ static jlong jni_zdata_command_class_find(JNIEnv *env, jobject obj, jstring path
     return (jlong)jzdata;
 }
 
-static void jni_zdata_add_callback(JNIEnv *env, jobject obj, jlong dh) {
+static void jni_zdata_add_callback(JNIEnv *env, jobject obj, jobject this, jlong dh) {
     (void)obj;
 
     JZData jzdata = (JZData)dh;
     
     if (jzdata->self == NULL) {
-        jzdata->self = (*env)->NewGlobalRef(env, obj);
+        jzdata->self = (*env)->NewGlobalRef(env, this);
     }
-    
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     ZWError err = zdata_add_callback(jzdata->dh, (ZDataChangeCallback)&dataCallback, 0, jzdata);
     zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
@@ -843,7 +842,7 @@ static JNINativeMethod funcs[] = {
     { "jni_zdataDeviceFind", "(Ljava/lang/String;IJ)J", (void *)&jni_zdata_device_find },
     { "jni_zdataInstanceFind", "(Ljava/lang/String;IIJ)J", (void *)&jni_zdata_instance_find },
     { "jni_zdataCommandClassFind", "(Ljava/lang/String;IIIJ)J", (void *)&jni_zdata_command_class_find },
-    { "jni_zdataAddCallback", "(J)V", (void *)&jni_zdata_add_callback },
+    { "jni_zdataAddCallback", "(Ljava/lang/Object;J)V", (void *)&jni_zdata_add_callback },
     { "jni_zdataRemoveCallback", "(J)V", (void *)&jni_zdata_remove_callback },
     { "jni_zdataGetName", "(J)Ljava/lang/String;", (void *)&jni_zdata_get_name },
     { "jni_zdataGetPath", "(J)Ljava/lang/String;", (void *)&jni_zdata_get_path },
