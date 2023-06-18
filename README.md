@@ -24,6 +24,18 @@ try {
 }
 ```
 
+`new ZWay` loads the library and initialize required strutures. This call expects the following arguments:
+- Name of the instance (for logging purpose, any string can be used).
+- Path to the Z-Wave hardware port.
+- Baudrate (in most cases it is 115200 but for larg networks you might want to switch your hardware to a faster speed).
+- Path to the configuration file where all interview information is saved. You can use the same folder as z-way-server is using to be able to run z-way-server and your app (but only one at a time!).
+- Path to translation files (shipped with Z-Way).
+- Path to the ZDDX database files (shipped with Z-Way). You can point to an empty folder to skip using this database (only old non-Z-Wave Plus devices require this database for proper operation).
+
+`zway.discover()` start communications with the Z-Wave hardware. After this call the library will be notified about new events and creation/removal of devices/instances/Command Classes using callback functions.
+
+This call is syncronous.
+
 ## Network management and running the library
 
 Network management functions:
@@ -33,7 +45,9 @@ zway.controller.addNodeToNetwork(true); // Add node
 zway.controller.removeNodeFromNetwork(true); // Remove node
 ````
 
-More functions:
+Those functions are asynchronous and will return immediately.
+
+Z-Way thread will stop if the hardware is removed (port has gone) or stop() was called. To check if the Z-Way thread is running, use:
 ```
 zway.isRunning(); // returns true if Z-Wave is running or false when Z-Way has stopped
 ```
@@ -114,10 +128,14 @@ Change type is one of the:
 * `phantomUpdate` (bit flag, set if the data value is updated, but the new value is the same as the old one)
 
 ## Calling Command Classes methods:
+
 ```
 switchBinary.get();
 switchBinary.set(s, 0);
 ```
+
+Those functions are asynchronous and will return immediately. A callback will be called once the command was transmitted to the target devic.
+
 The full list of methods is listed in the manual [Z-Way manual](https://z-wave.me/manual/z-way/Command_Class_Reference.html).
 
 ## Error handling
@@ -125,9 +143,13 @@ The full list of methods is listed in the manual [Z-Way manual](https://z-wave.m
 * `ZWay.Data.NotFound` is raised when data is not found.
 * `ZWay.Data.NotAlive` data object was deleted in the underlying library and is not valid anymore
 
+## Cleanup
+
+TBD
+
 # Building
 
-## Ubuntu
+## Ubuntu/Debian/Raspbian
 
 ### Install
 
@@ -137,8 +159,20 @@ Install JDK8
 
 [Install Z-Way library](https://z-wave.me/z-way/download-z-way/)
 
-### Compile and run
+### Compiling
 
 In Terminal in the wrapper folder:
 
 `make clean all run`
+
+### Running your or test project
+
+Only one software at time can speak with the Z-WAve hardware port!
+
+Stop Z-Way server (or disable the app using the Z-Wave hardware port) before running your app:
+
+`sudo /etc/init.d/z-way-server stop`
+
+Run the test project:
+
+`make run`
