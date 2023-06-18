@@ -178,7 +178,6 @@ public final class ZWay {
         public final String path;
 
         private Boolean isAlive;
-        private Boolean isMonitored;
         
         private Set<DataCallback> callbacks;
         
@@ -229,27 +228,19 @@ public final class ZWay {
             name = jni_zdataGetName(dh);
             path = jni_zdataGetPath(dh);
             isAlive = true;
-            isMonitored = false;
             callbacks = new HashSet<>();
+            jni_zdataAddCallback(dh);
             getValue();
         }
 
         @Override
         public void finalize() {
-            if (isMonitored) {
-                jni_zdataRemoveCallback(dh);
-            }
+            jni_zdataRemoveCallback(dh);
         }
 
         private void isAlive() throws NotAlive {
             if (!isAlive) {
                 throw new NotAlive(this);
-            }
-
-            if (!isMonitored) {
-                // here we will let the C part save `this` object (it was not available in the contructor yet)
-                jni_zdataAddCallback(dh);
-                isMonitored = true;
             }
         }
         

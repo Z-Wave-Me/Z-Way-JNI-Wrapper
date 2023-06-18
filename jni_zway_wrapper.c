@@ -101,6 +101,54 @@ static jlong jni_zway_init(JNIEnv *env, jobject obj, jstring name, jstring port,
     JZWay jzway = (JZWay)malloc(sizeof(struct JZWay));
     jzway->zway = zway;
 
+    jclass cls = (*env)->FindClass(env, JNIT_CLASS);
+    if (cls == 0) {
+        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS " class not found"));
+        ZWError err = InvalidArg;
+        JNI_THROW_EXCEPTION_RET(0);
+    }
+    jmethodID successCallbackID = (*env)->GetMethodID(env, cls, "successCallback", "(Ljava/lang/Object;)V");
+    jmethodID failureCallbackID = (*env)->GetMethodID(env, cls, "failureCallback", "(Ljava/lang/Object;)V");
+    jmethodID deviceCallbackID = (*env)->GetMethodID(env, cls, "deviceCallback", "(IIII)V");
+    jmethodID terminateCallbackID = (*env)->GetMethodID(env, cls, "terminateCallback", "()V");
+    if (successCallbackID == 0 || failureCallbackID == 0 || deviceCallbackID == 0 || terminateCallbackID == 0) {
+        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS " callback ID method not found"));
+        ZWError err = InvalidArg;
+        JNI_THROW_EXCEPTION_RET(0);
+    }
+
+    jclass clsData = (*env)->FindClass(env, JNIT_CLASS_DATA);
+    if (clsData == 0) {
+        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS_DATA " class not found"));
+        ZWError err = InvalidArg;
+        JNI_THROW_EXCEPTION_RET(0);
+    }
+    jmethodID dataCallbackID = (*env)->GetMethodID(env, clsData, "dataCallback", "(I)V");
+    if (dataCallbackID == 0) {
+        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS_DATA " callback ID method not found"));
+        ZWError err = InvalidArg;
+        JNI_THROW_EXCEPTION_RET(0);
+    }
+
+    jobject self = (*env)->NewGlobalRef(env, obj);
+    
+    (*env)->GetJavaVM(env, &(jzway->jvm));
+    jzway->self = self;
+    jzway->successCallbackID = successCallbackID;
+    jzway->failureCallbackID = failureCallbackID;
+    jzway->deviceCallbackID = deviceCallbackID;
+    jzway->terminateCallbackID = terminateCallbackID;
+    jzway->dataCallbackID = dataCallbackID;
+
+    // Set up device callback
+    
+    err = zway_device_add_callback(jzway->zway, DeviceAdded | DeviceRemoved | InstanceAdded | InstanceRemoved | CommandAdded | CommandRemoved, (ZDeviceCallback)deviceCallback, (void *)jzway);
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION_RET(0);
+    }
+
+    // Start Z-Way thread
+    
     err = zway_start(zway, terminateCallback, (void *)jzway);
     if (err != NoError) {
         zway_terminate(&zway);
@@ -114,53 +162,7 @@ static jlong jni_zway_init(JNIEnv *env, jobject obj, jstring name, jstring port,
 static void jni_discover(JNIEnv *env, jobject obj, jlong ptr) {
     JZWay jzway = (JZWay)ptr;
 
-    jclass cls = (*env)->FindClass(env, JNIT_CLASS);
-    if (cls == 0) {
-        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS " class not found"));
-        ZWError err = InvalidArg;
-        JNI_THROW_EXCEPTION();
-    }
-    jmethodID successCallbackID = (*env)->GetMethodID(env, cls, "successCallback", "(Ljava/lang/Object;)V");
-    jmethodID failureCallbackID = (*env)->GetMethodID(env, cls, "failureCallback", "(Ljava/lang/Object;)V");
-    jmethodID deviceCallbackID = (*env)->GetMethodID(env, cls, "deviceCallback", "(IIII)V");
-    jmethodID terminateCallbackID = (*env)->GetMethodID(env, cls, "terminateCallback", "()V");
-    if (successCallbackID == 0 || failureCallbackID == 0 || deviceCallbackID == 0 || terminateCallbackID == 0) {
-        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS " callback ID method not found"));
-        ZWError err = InvalidArg;
-        JNI_THROW_EXCEPTION();
-    }
-
-    jclass clsData = (*env)->FindClass(env, JNIT_CLASS_DATA);
-    if (clsData == 0) {
-        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS_DATA " class not found"));
-        ZWError err = InvalidArg;
-        JNI_THROW_EXCEPTION();
-    }
-    jmethodID dataCallbackID = (*env)->GetMethodID(env, clsData, "dataCallback", "(I)V");
-    if (dataCallbackID == 0) {
-        zway_log(jzway->zway, Critical, ZSTR(JNIT_CLASS_DATA " callback ID method not found"));
-        ZWError err = InvalidArg;
-        JNI_THROW_EXCEPTION();
-    }
-
-    jobject self = (*env)->NewGlobalRef(env, obj);
-    
-    (*env)->GetJavaVM(env, &(jzway->jvm));
-    jzway->self = self;
-    jzway->successCallbackID = successCallbackID;
-    jzway->failureCallbackID = failureCallbackID;
-    jzway->deviceCallbackID = deviceCallbackID;
-    jzway->terminateCallbackID = terminateCallbackID;
-    jzway->dataCallbackID = dataCallbackID;
-
-    ZWError err;
-    
-    err = zway_device_add_callback(jzway->zway, DeviceAdded | DeviceRemoved | InstanceAdded | InstanceRemoved | CommandAdded | CommandRemoved, (ZDeviceCallback)deviceCallback, (void *)jzway);
-    if (err != NoError) {
-        JNI_THROW_EXCEPTION();
-    }
-
-    err = zway_discover(jzway->zway);
+    ZWError err = zway_discover(jzway->zway);
 
     if (err != NoError) {
         JNI_THROW_EXCEPTION();
