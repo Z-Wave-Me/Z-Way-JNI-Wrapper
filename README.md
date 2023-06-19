@@ -172,6 +172,7 @@ levelData.unbind(myDataCbk);
 ## Calling Command Classes methods:
 
 ```
+ZWay.Device.Instance.SwitchBinary switchBinary = zway.devices.get(nodeId).instances.get(instanceId).commandClassesByName.get("switchBinary");
 switchBinary.get();
 switchBinary.set(s, 0);
 ```
@@ -179,6 +180,17 @@ switchBinary.set(s, 0);
 Those functions are asynchronous and will return immediately. A callback will be called once the command was transmitted to the target devic.
 
 The full list of methods is listed in the manual [Z-Way manual](https://z-wave.me/manual/z-way/Command_Class_Reference.html).
+
+## Calling Z-Wave Serial API commands (Function Classes):
+
+```
+zway.setPriorityRoute(nodeId, repeater1, repeater2, repeater3, repeater4, route_speed);
+zway.setGetLongRangeChannel(channel);
+```
+
+Those functions are asynchronous and will return immediately. A callback will be called once the command was transmitted to the target devic.
+
+The full list of methods is listed in the manual [Z-Way manual](https://z-wave.me/manual/z-way/Function_Class_Reference.html).
 
 ## Error handling
 
