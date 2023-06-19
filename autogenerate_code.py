@@ -170,18 +170,90 @@ def CapitalizedCase(name):
 
 ##################### FC ###################
 
+def ParseFC():
+        paramsDescriptions = Params()
+        lastParamName = ""
+        className = ""
+        
+        functionClasses = []
+
+        fcDefinition = open(libZWayDir + 'FunctionClassesPublic.h', 'r')
+
+        for l in fcDefinition.readlines():
+                if l.strip() == "":
+                    paramsDescriptions = Params() # new function description started
+                    lastParamName = ""
+                    continue
+
+                m = re.match("^// @JSName: *(.*) *$", l)
+                if m is not None:
+                        mValue = m.groups()[0].strip(" ")
+                        ####
+
+                m = re.match("^// (@param:|@default:)? *(.*) *$", l)
+                if m is not None:
+                        mValue = m.groups()[1].strip(" ")
+                        if m.groups()[0] == "@param:":
+                                lastParamName = mValue
+                                if mValue == "zway": # we skip zway parameter
+                                    continue
+                                paramsDescriptions.Add(Param(mValue))
+                        elif m.groups()[0] == "@default:":
+                                if paramsDescriptions.Get(lastParamName) is not None:
+                                    paramsRegEx = " *(-?0x[0-9a-f]+|-?[0-9]+|NULL|TRUE|FALSE)"
+                                    mm = re.match(paramsRegEx, mValue)
+                                    if mm is None:
+                                        raise ValueError("Default value definition incorrect. Current line is: %s" % l)
+                                    paramsDescriptions.Get(lastParamName).default = mm.groups()[0]
+                        continue
+
+                if l.startswith("ZWEXPORT ZWError "):
+                        prototypeC = l
+                        paramsRegEx = " *, *([\w ]+[ \*]+) *(\w+)"
+                        m = re.match("ZWEXPORT ZWError *(\w+)\(ZWay zway((%s)*)\)" % paramsRegEx, prototypeC)
+                        if m is None:
+                                raise ValueError("Error parsing line in search of C prototype string: %s" % prototypeC)
+                        funcCName = m.groups()[0]
+                        f = re.findall(paramsRegEx, m.groups()[1])
+                        if f is None:
+                                raise ValueError("Error parsing line in search of C prototype string: %s" % prototypeC)
+                        paramsC = map(lambda x: (x[0].strip(' '), x[1]), f) # this match eats spaces too - strip them
+                        if len(paramsDescriptions) != len(paramsC):
+                            raise ValueError("Parameters description mismatch C declaration of %s\n%s != %s" % (prototypeC, paramsDescriptions, paramsC))
+                        if map(lambda x: x.name, paramsDescriptions[-3:]) != ["successCallback", "failureCallback", "callbackArg"]:
+                            raise ValueError("C successCallback, failureCallback, callbackArg arguments are missing")
+
+                        paramsDescriptions.pop(-1) # remove successCallback
+                        paramsDescriptions.pop(-1) # failureCallback and
+                        paramsDescriptions.pop(-1) # callbackArg
+                        paramsC = paramsC[0:-3]
+
+                        for p in paramsC:
+                            try:
+                                paramsDescriptions.Get(p[1]).type = p[0]
+                            except:
+                                raise ValueError("%s: Can not match parameter %s in [%s]" % (funcCName, p[1], ', '.join(map(lambda x: x.name, paramsDescriptions))))
+
+                        cmd = Command(funcCName)
+                        cmd.params = paramsDescriptions
+                        
+                        for i in range(0, len(paramsDescriptions)):
+                                if i != len(paramsDescriptions) - 1 and IsWithLength(paramsDescriptions, i):
+                                        cmd.params[i].isLength = True
+                                        cmd.params[i].dataName = cmd.params[i + 1].name
+                        
+                        functionClasses.append(cmd)
+
+        fcDefinition.close()
+        return functionClasses
+
 
 ##################### CC ###################
 
 def ParseCC():
-        ccTemplates = {}
         paramsDescriptions = Params()
-        funcDescription = []
-        dhDescriptions = []
-        funcReport = ""
         lastParamName = ""
         className = ""
-        classID = ""
         
         commandClasses = []
 
