@@ -36,6 +36,36 @@ try {
 
 This call is syncronous.
 
+## Devices/Instances/CommandClasses add/removal callback
+
+static class DeviceDemo implements ZWay.DeviceCallback {
+    public void deviceCallback(Integer type, Integer deviceId, Integer instanceId, Integer commandClassId) {
+
+Subscribing to device/instance/Command Class add/remove event:
+```
+MyCallback myCbk = new MyCallback();
+zway.bind(myCbk);
+
+static class MyCallback implements ZWay.DeviceCallback {
+    public void deviceCallback(Integer type, Integer deviceId, Integer instanceId, Integer commandClassId) {
+        ....
+    }
+}
+```
+
+Event type is one of the:
+* `ZWay.deviceAdded` (device was added)
+* `ZWay.deviceRemoved` (device was removed)
+* `ZWay.instanceAdded` (instance was added)
+* `ZWay.instanceRemoved` (instance was removed)
+* `ZWay.commandAdded` (Command Class was added)
+* `ZWay.commandRemoved` (Command Class was removed)
+
+Unsubscribing the handler:
+```
+zway.unbind(myCbk);
+```
+
 ## Network management and running the library
 
 Network management functions:
@@ -64,6 +94,12 @@ ZWay.Device.Instance.SwitchBinary switchBinary = zway.devices.get(nodeId).instan
 ```
 devices, instances and commandClassesBy* are iterable lists.
 
+To get the Command Class Id by Name and vice versa:
+```
+Integer id = ZWay.commandClassIdByName.get("switchBinary");
+String name = ZWay.commandClassNameById.get(26);
+```
+
 ## Working with Data
 
 Getting data on controller, device, instance and command class:
@@ -79,7 +115,7 @@ Finding data object subtree:
 ZWay.Data levelData = switchBinary.data.get("level");
 ZWay.Data config11Data = configuration.data.get("11.val");
 ZWay.Data config11Data = configuration.data.get("11").get("val");
-Data children[] = data.datagetChildren();
+ZWay.Data children[] = data.datagetChildren();
 ```
 
 Getting data type and values:
@@ -112,7 +148,8 @@ data.setEmpty();
 
 Subscribing to data change:
 ```
-levelData.bind(new MyLevelChange());
+MyLevelChange myDataCbk = new MyLevelChange();
+levelData.bind(myDataCbk);
 
 static class MyLevelChange implements ZWay.DataCallback {
     public void dataCallback(ZWay.Data data, Integer type) {
@@ -121,11 +158,16 @@ static class MyLevelChange implements ZWay.DataCallback {
 }
 ```
 Change type is one of the:
-* `updated` (data was updated)
-* `invalidated` (data was marked as outdated and new value is expected)
-* `deleted` (this is the last update of the device before it is deleted, all further operations on this object will raise NotAlive)
-* `childCreated` (child data element was created)
-* `phantomUpdate` (bit flag, set if the data value is updated, but the new value is the same as the old one)
+* `ZWay.Data.updated` (data was updated)
+* `ZWay.Data.invalidated` (data was marked as outdated and new value is expected)
+* `ZWay.Data.deleted` (this is the last update of the device before it is deleted, all further operations on this object will raise NotAlive)
+* `ZWay.Data.BchildCreated` (child data element was created)
+* `ZWay.Data.phantomUpdate` (bit flag, set if the data value is updated, but the new value is the same as the old one)
+
+Unsubscribing the handler:
+```
+levelData.unbind(myDataCbk);
+```
 
 ## Calling Command Classes methods:
 
