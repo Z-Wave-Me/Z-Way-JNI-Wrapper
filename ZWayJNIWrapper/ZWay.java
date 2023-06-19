@@ -20,6 +20,8 @@ public final class ZWay {
     public Controller controller;
     public Map<Integer, Device> devices;
 
+    private Set<DeviceCallback> deviceCallbacks;
+
     static {
         System.loadLibrary("jzway");
     }
@@ -29,6 +31,16 @@ public final class ZWay {
 
         controller = new Controller();
         devices = new HashMap<>();
+
+        deviceCallbacks = new HashSet<>();
+    }
+
+    public void bind(DeviceCallback func) throws Exception {
+        deviceCallbacks.add(func);
+    }
+
+    public void unbind(DeviceCallback func) throws Exception {
+        deviceCallbacks.remove(func);
     }
 
     public void discover() {
@@ -120,6 +132,10 @@ public final class ZWay {
         } else {
             System.out.println("Unhandled deviceCallback: type = " + type + ", id = " + deviceId + ", instance = " + instanceId + ", commandClass = " + commandClassId);
         }
+
+        for (DeviceCallback dc : deviceCallbacks) {
+            dc.deviceCallback(type, deviceId, instanceId, commandClassId);
+        }
     }
 
     private void terminateCallback() {
@@ -148,6 +164,10 @@ public final class ZWay {
 
     public interface DataCallback {
         public void dataCallback(Data data, Integer type);
+    }
+
+    public interface DeviceCallback {
+        public void deviceCallback(Integer type, Integer deviceId, Integer instanceId, Integer commandClassId);
     }
     
     public final class Data {

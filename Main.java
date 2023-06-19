@@ -1,8 +1,10 @@
 import ZWayJNIWrapper.*;
 
 class Main {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
         ZWay zway = init();
+
+        zway.bind(new DeviceDemo());
 
         discover(zway);
 
@@ -60,12 +62,18 @@ class Main {
             }
         }
     }
+
+    static class DeviceDemo implements ZWay.DeviceCallback {
+        public void deviceCallback(Integer type, Integer deviceId, Integer instanceId, Integer commandClassId) {
+            System.out.println("Device Callback of type " + type + " was caught. The arguments are: device ID: " + deviceId + "; instance ID: " + instanceId + "; command class ID: " + commandClassId + ";");
+        }
+    }
     
     public static ZWay init() {
         ZWay zway;
         try {
             System.out.println("init zway");
-            zway = new ZWay("zway", "/dev/ttyACM0", 115200, "z-way-root/config", "z-way-root/translations", "z-way-root/ZDDX", 0);
+            zway = new ZWay("zway", "/dev/ttyACM2", 115200, "z-way-root/config", "z-way-root/translations", "z-way-root/ZDDX", 0);
         } catch (java.lang.Exception e) {
             System.out.println(e);
             throw new RuntimeException();
