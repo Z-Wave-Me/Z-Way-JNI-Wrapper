@@ -7,6 +7,7 @@ class Main {
         zway = init();
 
         zway.bind(new DeviceDemo());
+        zway.bind(new StatusDemo());
 
         discover(zway);
 
@@ -25,7 +26,7 @@ class Main {
             Thread.sleep(1000);
             try {
                 System.out.println("switch");
-                ((ZWay.Device.Instance.SwitchBinary) zway.devices.get(nodeId).instances.get(0).commandClassesByName.get("switchBinary")).set(s, 0);
+                ((ZWay.Device.Instance.SwitchBinary) zway.devices.get(nodeId).instances.get(0).commandClassesByName.get("switchBinary")).set(s, 0, "SwitchBinary 2.0.37");
             } catch (java.lang.Exception e) {
                 System.out.println(e);
             }
@@ -71,6 +72,16 @@ class Main {
                 } catch (java.lang.Exception e) {
                     System.out.println(e);
                 }
+            }
+        }
+    }
+
+    static class StatusDemo implements ZWay.StatusCallback {
+        public void statusCallback(boolean result, Object obj) {
+            if (result) {
+                System.out.println("Function completed successfully with an argument: " + obj);
+            } else {
+                System.out.println("Function failed with an argument: " + obj);
             }
         }
     }
