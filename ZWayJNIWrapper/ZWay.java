@@ -4,7 +4,6 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,19 +21,21 @@ public final class ZWay {
 
     private Set<DeviceCallback> deviceCallbacks;
     private Set<StatusCallback> statusCallbacks;
+    private Set<TerminateCallback> terminateCallbacks;
 
     static {
         System.loadLibrary("jzway");
     }
 
-    public ZWay(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder, long ternminator_callback) throws Exception {
-        jzway = jni_zwayInit(name, port, speed, config_folder, translations_folder, zddx_folder, ternminator_callback);
+    public ZWay(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder, long terminator_callback) throws Exception {
+        jzway = jni_zwayInit(name, port, speed, config_folder, translations_folder, zddx_folder, terminator_callback);
 
         controller = new Controller();
         devices = new HashMap<>();
 
         deviceCallbacks = new HashSet<>();
         statusCallbacks = new HashSet<>();
+        terminateCallbacks = new HashSet<>();
     }
 
     public void bind(DeviceCallback func) throws Exception {
@@ -51,6 +52,14 @@ public final class ZWay {
 
     public void unbind(StatusCallback func) {
         statusCallbacks.remove(func);
+    }
+
+    public void bind(TerminateCallback func) {
+        terminateCallbacks.add(func);
+    }
+
+    public void unbind(TerminateCallback func) {
+        terminateCallbacks.remove(func);
     }
 
     public void discover() {
@@ -154,10 +163,13 @@ public final class ZWay {
     }
 
     private void terminateCallback() {
+        for (TerminateCallback tc : terminateCallbacks) {
+            tc.terminateCallback();
+        }
     }
 
     // JNI functions
-    private native long jni_zwayInit(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder, long ternminator_callback);
+    private native long jni_zwayInit(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder, long terminator_callback);
     private native void jni_discover(long ptr);
     private native boolean jni_isRunning(long ptr);
     private native void jni_addNodeToNetwork(long ptr, boolean startStop);
@@ -200,6 +212,10 @@ public final class ZWay {
 
     public interface StatusCallback {
         public void statusCallback(boolean result, Object obj);
+    }
+
+    public interface TerminateCallback {
+        public void terminateCallback();
     }
     
     public final class Data {

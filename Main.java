@@ -8,6 +8,7 @@ class Main {
 
         zway.bind(new DeviceDemo());
         zway.bind(new StatusDemo());
+        zway.bind(new TerminateDemo());
 
         discover(zway);
 
@@ -83,6 +84,12 @@ class Main {
             } else {
                 System.out.println("Function failed with an argument: " + obj);
             }
+        }
+    }
+
+    static class TerminateDemo implements ZWay.TerminateCallback {
+        public void terminateCallback() {
+            System.out.println("Object terminated");
         }
     }
     

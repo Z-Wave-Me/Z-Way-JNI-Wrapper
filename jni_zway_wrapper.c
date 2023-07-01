@@ -817,9 +817,8 @@ static void terminateCallback(const ZWay zway, void* arg) {
     (*(jzway->jvm))->AttachCurrentThread(jzway->jvm, (void**) &env, NULL);
     (*env)->CallVoidMethod(env, jzway->self, jzway->terminateCallbackID, NULL);
     (*(jzway->jvm))->DetachCurrentThread(jzway->jvm);
-    
-    free(jzway);
-    jzway = NULL;
+
+    jzway->zway = NULL; // to prevent further crashes in libzway calls
 }
 
 // Function Classes methods
