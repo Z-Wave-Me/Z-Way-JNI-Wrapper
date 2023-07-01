@@ -167,6 +167,7 @@ static void jni_discover(JNIEnv *env, jobject obj, jlong ptr) {
 
 static void jni_add_node_to_network(JNIEnv *env, jobject obj, jlong jzway, jboolean startStop) {
     (void)obj;
+    (void)env;
 
     ZWay zway = ((JZWay)jzway)->zway;
 
@@ -179,6 +180,7 @@ static void jni_add_node_to_network(JNIEnv *env, jobject obj, jlong jzway, jbool
 
 static void jni_remove_node_from_network(JNIEnv *env, jobject obj, jlong jzway, jboolean startStop) {
     (void)obj;
+    (void)env;
     
     ZWay zway = ((JZWay)jzway)->zway;
 
@@ -189,12 +191,204 @@ static void jni_remove_node_from_network(JNIEnv *env, jobject obj, jlong jzway, 
     }
 }
 
+static void jni_controller_change(JNIEnv *env, jobject obj, jlong jzway, jboolean startStop) {
+    (void)obj;
+    (void)env;
+
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_controller_change(zway, startStop);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_set_suc_node_id(JNIEnv *env, jobject obj, jlong jzway, jint node_id) {
+    (void)obj;
+    (void)env;
+
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_controller_set_suc_node_id(zway, node_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_set_sis_node_id(JNIEnv *env, jobject obj, jlong jzway, jint node_id) {
+    (void)obj;
+    (void)env;
+
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_controller_set_sis_node_id(zway, node_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_disable_suc_node_id(JNIEnv *env, jobject obj, jlong jzway, jint node_id) {
+    (void)obj;
+    (void)env;
+
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_controller_disable_suc_node_id(zway, node_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
 static void jni_set_default(JNIEnv *env, jobject obj, jlong jzway) {
     (void)obj;
+    (void)env;
 
     ZWay zway = ((JZWay)jzway)->zway;
 
     ZWError err = zway_controller_set_default(zway);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_request_network_update(JNIEnv *env, jobject obj, jlong jzway) {
+    (void)obj;
+    (void)env;
+
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    int node_id;
+    int suc_node_id;
+
+    ZWError err;
+
+    zdata_acquire_lock(ZDataRoot(zway));
+    err = zdata_get_integer(zway_find_controller_data(zway, "nodeId"), &node_id);
+    zdata_release_lock(ZDataRoot(zway));
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+
+    zdata_acquire_lock(ZDataRoot(zway));
+    err = zdata_get_integer(zway_find_controller_data(zway, "SUCNodeId"), &suc_node_id);
+    zdata_release_lock(ZDataRoot(zway));
+
+    if (err != NoError) {
+       JNI_THROW_EXCEPTION();
+   }
+
+   if (suc_node_id != 0 && node_id != suc_node_id) {
+        ZWError err = zway_controller_set_default(zway);
+
+        if (err != NoError) {
+            JNI_THROW_EXCEPTION();
+        }
+   }
+}
+
+static void jni_set_learn_mode(JNIEnv *env, jobject obj, jlong jzway, jboolean startStop) {
+    (void)obj;
+    (void)env;
+
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_controller_set_learn_mode(zway, startStop);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static jintArray jni_backup(JNIEnv *env, jobject obj, jlong jzway) {
+    (void)obj;
+    (void)env;
+
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWBYTE *backupData;
+    size_t backupSize;
+
+    ZWError err = zway_controller_config_save(zway, &backupData, &backupSize);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION_RET(0);
+    }
+
+    jintArray backup = (*env)->NewIntArray(env, (jsize)backupSize);
+    jint fill[backupSize];
+    for (int i = 0; i < backupSize; i++) {
+        fill[i] = backupData[i];
+    }
+    (*env)->SetIntArrayRegion(env, backup, 0, backupSize, fill);
+    return backup;
+}
+
+static void jni_restore(JNIEnv *env, jobject obj, jlong jzway, jintArray data, jboolean full) {
+    (void)obj;
+    (void)env;
+
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    jint *c_int_data = (*env)->GetIntArrayElements(env, data, NULL);
+    jsize length = (*env)->GetArrayLength(env, data);
+
+    ZWBYTE *c_byte_data = (ZWBYTE *)malloc(length);
+
+    for (int i = 0; i < length; i++) {
+        c_byte_data[i] = (ZWBYTE)c_int_data[i];
+    }
+
+    ZWError err = zway_controller_config_restore(zway, (const ZWBYTE *)c_byte_data, length, full);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_node_provisioning_dsk_add(JNIEnv *env, jobject obj, jlong jzway, jintArray dsk) {
+    (void)obj;
+    (void)env;
+
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    jint *c_int_dsk = (*env)->GetIntArrayElements(env, dsk, NULL);
+    jsize length = (*env)->GetArrayLength(env, dsk);
+
+    ZWBYTE *c_byte_dsk = (ZWBYTE *)malloc(length);
+
+    for (int i = 0; i < length; i++) {
+        c_byte_dsk[i] = (ZWBYTE)c_int_dsk[i];
+    }
+
+    ZWError err = zway_node_provisioning_dsk_add(zway, length, (const ZWBYTE *)c_byte_dsk, NULL);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_node_provisioning_dsk_remove(JNIEnv *env, jobject obj, jlong jzway, jintArray dsk) {
+    (void)obj;
+    (void)env;
+
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    jint *c_int_dsk = (*env)->GetIntArrayElements(env, dsk, NULL);
+    jsize length = (*env)->GetArrayLength(env, dsk);
+
+    ZWBYTE *c_byte_dsk = (ZWBYTE *)malloc(length);
+
+    for (int i = 0; i < length; i++) {
+        c_byte_dsk[i] = (ZWBYTE)c_int_dsk[i];
+    }
+
+    ZWError err = zway_node_provisioning_dsk_remove(zway, length, (const ZWBYTE *)c_byte_dsk);
 
     if (err != NoError) {
         JNI_THROW_EXCEPTION();
@@ -880,7 +1074,17 @@ static JNINativeMethod funcs[] = {
     { "jni_discover", "(J)V", (void *)&jni_discover },
     { "jni_addNodeToNetwork", "(JZ)V", (void *)&jni_add_node_to_network },
     { "jni_removeNodeFromNetwork", "(JZ)V", (void *)&jni_remove_node_from_network },
+    { "jni_controllerChange", "(JZ)V", (void *)&jni_controller_change },
+    { "jni_setSUCNodeId", "(JI)V", (void *)&jni_set_suc_node_id },
+    { "jni_setSISNodeId", "(JI)V", (void *)&jni_set_sis_node_id },
+    { "jni_disableSUCNodeId", "(JI)V", (void *)&jni_disable_suc_node_id },
     { "jni_setDefault", "(J)V", (void *)&jni_set_default },
+    { "jni_requestNetworkUpdate", "(J)V", (void *)&jni_request_network_update },
+    { "jni_setLearnMode", "(JZ)V", (void *)&jni_set_learn_mode },
+    { "jni_backup", "(J)[I", (void *)&jni_backup },
+    { "jni_restore", "(J[IZ)V", (void *)&jni_restore },
+    { "jni_nodeProvisioningDSKAdd", "(J[I)V", (void *)&jni_node_provisioning_dsk_add },
+    { "jni_nodeProvisioningDSKRemove", "(J[I)V", (void *)&jni_node_provisioning_dsk_remove },
     { "jni_isRunning", "(J)Z", (void *)&jni_is_running },
     { "jni_zdataFind", "(JLjava/lang/String;J)J", (void *)&jni_zdata_find },
     { "jni_zdataControllerFind", "(Ljava/lang/String;J)J", (void *)&jni_zdata_controller_find },

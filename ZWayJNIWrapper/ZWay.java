@@ -174,7 +174,17 @@ public final class ZWay {
     private native boolean jni_isRunning(long ptr);
     private native void jni_addNodeToNetwork(long ptr, boolean startStop);
     private native void jni_removeNodeFromNetwork(long ptr, boolean startStop);
+    private native void jni_controllerChange(long ptr, boolean startStop);
+    private native void jni_setSUCNodeId(long ptr, int nodeId);
+    private native void jni_setSISNodeId(long ptr, int nodeId);
+    private native void jni_disableSUCNodeId(long ptr, int nodeId);
     private native void jni_setDefault(long ptr);
+    private native void jni_requestNetworkUpdate(long ptr);
+    private native void jni_setLearnMode(long ptr, boolean startStop);
+    private native int[] jni_backup(long ptr);
+    private native void jni_restore(long ptr, int[] data, boolean full);
+    private native void jni_nodeProvisioningDSKAdd(long ptr, int[] dsk);
+    private native void jni_nodeProvisioningDSKRemove(long ptr, int[] dsk);
     private native long jni_zdataFind(long dh, String path, long jzway);
     private native long jni_zdataControllerFind(String path, long jzway);
     private native long jni_zdataDeviceFind(String path, int deviceId, long jzway);
@@ -627,8 +637,56 @@ public final class ZWay {
             jni_removeNodeFromNetwork(jzway, startStop);
         }
 
+        public void change(boolean startStop) {
+            jni_controllerChange(jzway, startStop);
+        }
+
+        public void getSUCNodeId() {
+            jni_fc_getSucNodeId(jzway, 0);
+        }
+
+        public void setSUCNodeId(int nodeId) {
+            jni_setSUCNodeId(jzway, nodeId);
+        }
+
+        public void setSISNodeId(int nodeId) {
+            jni_setSISNodeId(jzway, nodeId);
+        }
+
+        public void disableSUCNodeId(int nodeId) {
+            jni_disableSUCNodeId(jzway, nodeId);
+        }
+
+        public void sendNodeInformation(int nodeId) {
+            jni_fc_sendNodeInformation(jzway, nodeId, 0);
+        }
+
         public void setDefault() {
             jni_setDefault(jzway);
+        }
+
+        public void requestNetworkUpdate() {
+            jni_requestNetworkUpdate(jzway);
+        }
+
+        public void setLearnMode(boolean startStop) {
+            jni_setLearnMode(jzway, startStop);
+        }
+
+        public int[] backup() {
+            return jni_backup(jzway);
+        }
+
+        public void restore(int[] data, boolean full) {
+            jni_restore(jzway, data, full);
+        }
+
+        public void nodeProvisioningDSKAdd(int[] dsk) {
+            jni_nodeProvisioningDSKAdd(jzway, dsk);
+        }
+
+        public void nodeProvisioningDSKRemove(int[] dsk) {
+            jni_nodeProvisioningDSKRemove(jzway, dsk);
         }
     }
 
