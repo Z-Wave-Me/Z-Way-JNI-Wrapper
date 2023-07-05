@@ -38,6 +38,11 @@ public final class ZWay {
         terminateCallbacks = new HashSet<>();
     }
 
+    @Override
+    public void finalize() {
+        jni_finalize(jzway);
+    }
+
     public void bind(DeviceCallback func) throws Exception {
         deviceCallbacks.add(func);
     }
@@ -170,6 +175,7 @@ public final class ZWay {
 
     // JNI functions
     private native long jni_zwayInit(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder, long terminator_callback);
+    private native void jni_finalize(long ptr);
     private native void jni_discover(long ptr);
     private native boolean jni_isRunning(long ptr);
     private native void jni_addNodeToNetwork(long ptr, boolean startStop);

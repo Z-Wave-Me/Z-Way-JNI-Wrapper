@@ -155,6 +155,11 @@ static jlong jni_zway_init(JNIEnv *env, jobject obj, jstring name, jstring port,
     return (jlong)jzway;
 }
 
+static void jni_finalize(JNIEnv *env, jobject obj, jlong ptr) {
+    free((JZWay)ptr);
+}
+
+
 static void jni_discover(JNIEnv *env, jobject obj, jlong ptr) {
     JZWay jzway = (JZWay)ptr;
 
@@ -1072,6 +1077,7 @@ static void jni_cc_%function_short_name%(JNIEnv *env, jobject obj, jlong jzway, 
 
 static JNINativeMethod funcs[] = {
     { "jni_zwayInit", "(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;J)J", (void *)&jni_zway_init },
+    { "jni_finalize", "(J)V", (void *)&jni_finalize },
     { "jni_discover", "(J)V", (void *)&jni_discover },
     { "jni_addNodeToNetwork", "(JZ)V", (void *)&jni_add_node_to_network },
     { "jni_removeNodeFromNetwork", "(JZ)V", (void *)&jni_remove_node_from_network },
