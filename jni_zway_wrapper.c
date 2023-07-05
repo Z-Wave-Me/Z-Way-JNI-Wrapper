@@ -578,12 +578,13 @@ static jlongArray jni_zdata_get_children(JNIEnv *env, jobject obj, jlong dh) {
     }
 
     jlong fill[length];
-    JZData jzchild;
+    JZData jzchild = (JZData)malloc(sizeof(struct JZData));
         
     child = zdata_first_child((const ZDataHolder)jzdata->dh);
     for (int i = 0; i < length; i++) {
         TODO(this is wrong! fill properly jzchild structure)
-        jzchild = (JZData)dh;
+        jzchild->jzway = ((JZData)dh)->jzway;
+        jzchild->self = ((JZData)dh)->self;
         jzchild->dh = child->data;
         fill[i] = (long) jzchild;
         child = zdata_next_child(child);
