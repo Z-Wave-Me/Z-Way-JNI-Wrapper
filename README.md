@@ -66,6 +66,26 @@ Unsubscribing the handler:
 zway.unbind(myCbk);
 ```
 
+## Termination callback
+
+Termination callback when Z-Way is terminated by user call or by port disconnect (for example, USB disconnection).
+
+You can catch this event using:
+```
+OnTermination onTermination = new OnTermination();
+zway.bind(onTermination);
+
+static class OnTermination implements ZWay.TerminateCallback {
+	public void terminateCallback() {
+		....
+	}
+}
+```
+
+Unsubscribing the handler:
+```
+zway.unbind(onTermination);
+```
 ## Network management and running the library
 
 Network management functions:
@@ -177,6 +197,12 @@ switchBinary.get();
 switchBinary.set(s, 0);
 ```
 
+If a callback upon execution is needed:
+```
+switchBinary.get(callbackArg);
+switchBinary.set(s, 0, callbackArg);
+```
+
 Those functions are asynchronous and will return immediately. A callback will be called once the command was transmitted to the target devic.
 
 The full list of methods is listed in the manual [Z-Way manual](https://z-wave.me/manual/z-way/Command_Class_Reference.html).
@@ -188,9 +214,48 @@ zway.setPriorityRoute(nodeId, repeater1, repeater2, repeater3, repeater4, route_
 zway.setGetLongRangeChannel(channel);
 ```
 
+If a callback upon execution is needed:
+```
+callback = new myFuncCallback();
+zway.setPriorityRoute(nodeId, repeater1, repeater2, repeater3, repeater4, route_speed, callbackArg);
+zway.setGetLongRangeChannel(channel, callbackArg);
+```
+
 Those functions are asynchronous and will return immediately. A callback will be called once the command was transmitted to the target devic.
 
 The full list of methods is listed in the manual [Z-Way manual](https://z-wave.me/manual/z-way/Function_Class_Reference.html).
+
+## Command Class and Function Class status callbacks
+
+Command Class method and Function Class calls are asyncronous. It is possible to get notified upon the execution of the command. For this subscribe to the ZWay.StatusCallback and pass an additional parameter to the call (any primitive or object).
+
+Upon the execution (successful or non-successful) the statusCallback callback will be called with the boolean result argument and the object passed during the original call.
+
+Subscribing to execution status events:
+```
+MyStatusCallback statusCbk = new MyStatusCallback();
+zway.bind(statusCbk);
+
+static class MyStatusCallback implements ZWay.StatusCallback {
+	public void statusCallback(boolean result, Object obj) {
+		// result true for success and false for failure
+		// obj is the object passed as callbackArg
+		....
+	}
+}
+```
+
+Call the Command Class or Function Class (callbackArg is the object passed to statusCallback on callback):
+```
+	((ZWay.Device.Instance.SwitchBinary) zway.devices.get(nodeId).instances.get(0).commandClassesByName.get("switchBinary")).set(true, 0, callbackArg);
+```
+
+Unsubscribing the handler:
+```
+zway.unbind(statusCbk);
+```
+
+Note that for Set and Get commands the callback will be called on delivery confirmation and not on the reply. Replies are to be monitored by subscribing to the corresponding Data element change.
 
 ## Error handling
 
