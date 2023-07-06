@@ -27,8 +27,8 @@ public final class ZWay {
         System.loadLibrary("jzway");
     }
 
-    public ZWay(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder, long terminator_callback) throws Exception {
-        jzway = jni_zwayInit(name, port, speed, config_folder, translations_folder, zddx_folder, terminator_callback);
+    public ZWay(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder) throws Exception {
+        jzway = jni_zwayInit(name, port, speed, config_folder, translations_folder, zddx_folder);
 
         controller = new Controller();
         devices = new HashMap<>();
@@ -174,7 +174,7 @@ public final class ZWay {
     }
 
     // JNI functions
-    private native long jni_zwayInit(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder, long terminator_callback);
+    private native long jni_zwayInit(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder);
     private native void jni_finalize(long ptr);
     private native void jni_discover(long ptr);
     private native boolean jni_isRunning(long ptr);
