@@ -489,10 +489,14 @@ def GenerateCodeCC(template):
                                 code.append(GenerateCodeCCLine(line, cc))
         return code
 
-clean = True if len(sys.argv) >= 2 and sys.argv[1] == "clean" else False
+if len(sys.argv) < 3:
+        print("Usage: " + sys.argv[0] + " (clean|generate) file1 [file2] ...]")
+        exit(1)
+
+clean = True if sys.argv[1] == "clean" else False
 
 functionClasses = ParseFC()
 commandClasses = ParseCC()
 
-ParseFile("jni_zway_wrapper.c", clean)
-ParseFile("ZWayJNIWrapper/ZWay.java", clean)
+for i in range(2, len(sys.argv)):
+        ParseFile(sys.argv[i], clean)
