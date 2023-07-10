@@ -3,12 +3,12 @@ TARGET = libjzway
 TARGET_DIR = $(TARGET)
 TARGET_SO = $(TARGET_DIR)/$(TARGET).so
 
-JAVA_DIR = src/main/java/me/z-wave/z-way
+JAVA_DIR = src/main/java/me/zwave/zway
 SCRIPT_DIR = src/main/scripts
 NATIVE_DIR = src/main/native
 
 # Z-Way
-ZWAY_ROOT = z-way-root
+ZWAY_ROOT = /opt/z-way-server/
 
 ZWAY_INC_DIR = $(ZWAY_ROOT)/libzway
 ZWAY_LIB_DIR = $(ZWAY_ROOT)/libs
@@ -46,11 +46,12 @@ $(TARGET_SO): $(C_OBJECTS)
 	$(CC) $(INCLUDES) $(TARGET_INCLUDES) $(CFLAGS) $(TARGET_ARCH) -c $< -o $@
 
 prepare:
-	python2 $(SCRIPT_DIR)/autogenerate_code.py generate $(NATIVE_DIR)/jni_zway_wrapper.c $(JAVA_DIR)/ZWay.java
+	python2 $(SCRIPT_DIR)/autogenerate_code.py generate $(ZWAY_ROOT) $(NATIVE_DIR)/jni_zway_wrapper.c $(JAVA_DIR)/ZWay.java
+	mkdir -p $(TARGET)
 	
 clean:
-	rm -f *.o *.class $(TARGET_DIR)/*.class $(TARGET_SO) hs_err_pid*.log
-	python2 $(SCRIPT_DIR)/autogenerate_code.py clean $(NATIVE_DIR)/jni_zway_wrapper.c $(JAVA_DIR)/ZWay.java
+	rm -fR *.o *.class $(TARGET_DIR) $(TARGET_SO) hs_err_pid*.log
+	python2 $(SCRIPT_DIR)/autogenerate_code.py clean $(ZWAY_ROOT) $(NATIVE_DIR)/jni_zway_wrapper.c $(JAVA_DIR)/ZWay.java
 
 copy:
 	cp $(patsubst %,$(ZWAY_LIB_DIR)/lib%.so,$(ZWAY_LIBS)) $(TARGET_DIR)

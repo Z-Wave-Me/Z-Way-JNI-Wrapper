@@ -5,8 +5,6 @@ import os
 import sys
 import subprocess
 
-libZWayDir = 'z-way-root/libzway/'
-
 class CommandClass:
     def __init__(self, name, id):
         self.name = name
@@ -489,14 +487,16 @@ def GenerateCodeCC(template):
                                 code.append(GenerateCodeCCLine(line, cc))
         return code
 
-if len(sys.argv) < 3:
-        print("Usage: " + sys.argv[0] + " (clean|generate) file1 [file2] ...]")
+if len(sys.argv) < 4:
+        print("Usage: " + sys.argv[0] + " (clean|generate) z-way-root-dir file1 [file2] ...]")
         exit(1)
 
 clean = True if sys.argv[1] == "clean" else False
 
+libZWayDir = sys.argv[2] + '/libzway/'
+
 functionClasses = ParseFC()
 commandClasses = ParseCC()
 
-for i in range(2, len(sys.argv)):
+for i in range(3, len(sys.argv)):
         ParseFile(sys.argv[i], clean)
