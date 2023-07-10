@@ -4,13 +4,49 @@
   <groupId>me.z-wave.z-way</groupId>
   <artifactId>z-way</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>z-way</name>
-  <url>http://maven.apache.org</url>
-
+  <version>4.1.0</version>
+  <name>Z-Way library Java wrapper</name>
+  <description>Java wrapper for Z-Wave.Me Z-Way library</description>
+  <url>https://z-wave.me/z-way/api</url>
+  
+  <licenses>
+    <license>
+      <name>Apache-2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  
+  <organization>
+    <name>Z-Wave.Me</name>
+    <url>https://z-wave.me/</url>
+  </organization>
+  
+  <scm>
+    <connection>scm:git@github.com:Z-Wave-Me/Z-Way-JNI-Wrapper.git</connection>
+    <url>https://github.com/Z-Wave-Me/Z-Way-JNI-Wrapper</url>
+  </scm>
+  
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/Z-Wave-Me/Z-Way-JNI-Wrapper/issues</url>
+  </issueManagement>
+  
+  <developers>
+    <developer>
+      <id>zme</id>
+      <name>Z-Wave.Me</name>
+    </developer>
+  </developers>
+  
   <properties>
-   <maven.compiler.source>1.8</maven.compiler.source>
-   <maven.compiler.target>1.8</maven.compiler.target>
+    <!-- path to Z-Way folder -->
+    <zway.root>/opt/z-way-server</zway.root>
+    
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
   
   <dependencies>
@@ -23,62 +59,179 @@
   </dependencies>
   
   <build>
+    <resources>
+      <resource>
+        <directory>target/native</directory>
+      </resource>
+      <resource>
+        <directory>target/resources</directory>
+      </resource>
+    </resources>
+            
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <!-- clean rules -->
+          <execution>
+            <id>autoclean_code</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>python2</executable>
+              <workingDirectory></workingDirectory>
+              <arguments>
+                <argument>src/main/scripts/autogenerate_code.py</argument>
+                <argument>clean</argument>
+                <argument>${zway.root}</argument>
+                <argument>src/main/native/jni_zway_wrapper.c</argument>
+                <argument>src/main/java/me/zwave/zway/ZWay.java</argument>
+              </arguments>    
+            </configuration>
+         </execution>
+          <execution>
+            <id>jni_clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>rm</executable>
+              <workingDirectory></workingDirectory>
+              <arguments>
+                <argument>-f</argument>
+                <argument>src/main/native/jni_zway_wrapper.o src/main/native/libjzway.so</argument>
+              </arguments>    
+            </configuration>
+         </execution>
+
+          <!-- generate-sources rules -->
+          <execution>
+            <id>autogenerate_code</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>python2</executable>
+              <workingDirectory></workingDirectory>
+              <arguments>
+                <argument>src/main/scripts/autogenerate_code.py</argument>
+                <argument>generate</argument>
+                <argument>${zway.root}</argument>
+                <argument>src/main/native/jni_zway_wrapper.c</argument>
+                <argument>src/main/java/me/zwave/zway/ZWay.java</argument>
+              </arguments>    
+            </configuration>
+          </execution>
+          <execution>
+            <id>jni_cc</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>cc</executable>
+              <workingDirectory></workingDirectory>
+              <arguments>
+                <argument>-I${zway.root}/libzway</argument>
+                <argument>-I/usr/lib/jvm/java-8-openjdk-amd64/include/</argument>
+                <argument>-I/usr/lib/jvm/java-8-openjdk-amd64/include/linux</argument>
+                <argument>-Wall</argument>
+                <argument>-Werror</argument>
+                <argument>-Wextra</argument>
+                <argument>-c</argument>
+                <argument>src/main/native/jni_zway_wrapper.c</argument>
+                <argument>-o</argument>
+                <argument>src/main/native/jni_zway_wrapper.o</argument>
+              </arguments>    
+            </configuration>
+          </execution>
+          <execution>
+            <id>jni_ld</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>cc</executable>
+              <workingDirectory></workingDirectory>
+              <arguments>
+                <argument>-L${zway.root}/libs</argument>
+                <argument>-shared</argument>
+                <argument>-o</argument>
+                <argument>src/main/native/libjzway.so</argument>
+                <argument>src/main/native/jni_zway_wrapper.o</argument>
+                <argument>-lzway</argument>
+                <argument>-lzs2</argument>
+                <argument>-lzcommons</argument>
+                <argument>-lpthread</argument>
+                <argument>-lxml2</argument>
+                <argument>-lz</argument>
+                <argument>-lm</argument>
+                <argument>-lcrypto</argument>
+                <argument>-larchive</argument>
+              </arguments>    
+            </configuration>
+         </execution>
+        </executions>
+      </plugin>
+      
+      <!-- generate-resources rules: copy libs and dictionaries to resources -->
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <version>3.3.1</version>
         <executions>
           <execution>
-            <id>copy-libzway</id>
-            <phase>package</phase>
+            <id>copy-native-libs</id>
+            <phase>generate-resources</phase>
             <goals>
-              <goal>copy-libzway</goal>
+              <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/libzway</outputDirectory>
+              <outputDirectory>${basedir}/target/native</outputDirectory>
               <resources>          
                 <resource>
-                  <directory>z-way-root/libs/</directory>
-                  <filtering>true</filtering>
+                  <directory>${zway.root}/libs</directory>
+                  <includes>
+                    <include>libzcommons.so</include>
+                    <include>libzs2.so</include>
+                    <include>libzway.so</include>
+                  </includes>
+                </resource>
+                <resource>
+                  <directory>src/main/native</directory>
+                  <includes>
+                    <include>libjzway.so</include>
+                  </includes>
                 </resource>
               </resources>              
             </configuration>            
           </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.7</version>
-        <executions>
           <execution>
-            <phase>process-classes</phase>
-            <configuration>
-              <target
-                name="jni"
-                description="Compile the native code">
-                <echo>Generating JNI headers</echo>
-                <!-- Does not work with OpenJDK, because Ant javah assumes Sun JVM
-                <javah
-                  destdir="${project.basedir}/src/main/c++"
-                  classpath="${project.build.outputDirectory}">
-                  <class name="ie.agisoft.Test"/>
-                </javah>
-                -->
-                <exec executable="javah" >
-                  <arg value="-d" />
-                  <arg value="${project.basedir}/src/main/c++" />
-                  <arg value="-classpath" />
-                  <arg value="${project.build.outputDirectory}" />
-                  <arg value="-force" />
-                  <arg value="ie.agisoft.Test" />
-                </exec>
-
-                <exec executable="make" ></exec>
-              </target>
-            </configuration>
+            <id>copy-zway-resources</id>
+            <phase>generate-resources</phase>
             <goals>
-              <goal>run</goal>
+              <goal>copy-resources</goal>
             </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/resources</outputDirectory>
+              <resources>          
+                <resource>
+                  <directory>${zway.root}</directory>
+                  <includes>
+                    <include>config/Defaults.xml</include>
+                    <include>config/zddx/.keep</include>
+                    <include>translations/*.xml</include>
+                    <include>ZDDX/*.xml</include>
+                  </includes>
+                </resource>
+              </resources>              
+            </configuration>            
           </execution>
         </executions>
       </plugin>
