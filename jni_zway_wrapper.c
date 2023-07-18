@@ -555,6 +555,26 @@ static jlongArray jni_zdata_get_children(JNIEnv *env, jobject UNUSED(obj), jlong
     return jchildren;
 }
 
+static jlong jni_zdata_get_update_time(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong dh) {
+    JZData jzdata = (JZData)dh;
+
+    zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
+    time_t time = zdata_get_update_time(jzdata->dh);
+    zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
+
+    return time;
+}
+
+static jlong jni_zdata_get_invalidate_time(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong dh) {
+    JZData jzdata = (JZData)dh;
+
+    zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
+    time_t time = zdata_get_invalidate_time(jzdata->dh);
+    zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
+
+    return time;
+}
+
 // zdata value: get by type
 
 static jboolean jni_zdata_get_boolean(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
@@ -1009,6 +1029,8 @@ static JNINativeMethod funcsData[] = {
     { "jni_zdataGetName", "(J)Ljava/lang/String;", (void *)&jni_zdata_get_name },
     { "jni_zdataGetPath", "(J)Ljava/lang/String;", (void *)&jni_zdata_get_path },
     { "jni_zdataGetChildren", "(J)[J", (void *)&jni_zdata_get_children },
+    { "jni_zdataGetUpdateTime", "(J)J", (void *)&jni_zdata_get_update_time },
+    { "jni_zdataGetInvalidateTime", "(J)J", (void *)&jni_zdata_get_invalidate_time },
     { "jni_zdataGetType", "(J)I", (void *)&jni_zdata_get_type },
     { "jni_zdataGetBoolean", "(J)Z", (void *)&jni_zdata_get_boolean },
     { "jni_zdataGetInteger", "(J)I", (void *)&jni_zdata_get_integer },

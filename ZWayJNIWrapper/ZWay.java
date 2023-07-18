@@ -261,6 +261,9 @@ public final class ZWay {
         public final String name;
         public final String path;
 
+        private long updateTime;
+        private long invalidateTime;
+
         private Boolean isAlive;
         
         private Set<DataCallback> callbacks;
@@ -313,6 +316,8 @@ public final class ZWay {
             path = jni_zdataGetPath(dh);
             isAlive = true;
             callbacks = new HashSet<>();
+            updateTime = jni_zdataGetUpdateTime(dh);
+            invalidateTime = jni_zdataGetInvalidateTime(dh);
             jni_zdataAddCallback(dh);
             getValue();
         }
@@ -339,7 +344,15 @@ public final class ZWay {
             
             callbacks.remove(func);
         }
-        
+
+        public long getUpdateTime() {
+            return updateTime;
+        }
+
+        public long getInvalidateTime() {
+            return invalidateTime;
+        }
+
         private void dataCallback(int type) throws Exception {
             // get type of the event
             boolean isPhantom = (phantomUpdate & type) > 0;
@@ -348,13 +361,17 @@ public final class ZWay {
             if (type == updated) {
                 getValue();
             } else if (type == invalidated) {
-                // TODO update invalidate time
+                jni_zdataGetInvalidateTime(dh);
             } else if (type == deleted) {
                 isAlive = false;
             } else if (type == childCreated) {
                 // nothing to do
             } else {
                 throw new Exception("Type of the event is an invalid integer.");
+            }
+
+            if (isPhantom) {
+                jni_zdataGetUpdateTime(dh);
             }
             
             for (DataCallback dc : callbacks) {
@@ -621,6 +638,8 @@ public final class ZWay {
         private native void jni_zdataSetStringArray(long dh, String[] data);
         private native long[] jni_zdataGetChildren(long dh);
         private native String jni_zdataGetPath(long dh);
+        private native long jni_zdataGetUpdateTime(long dh);
+        private native long jni_zdataGetInvalidateTime(long dh);
     }
 
     public final class Controller {
