@@ -175,6 +175,28 @@ static void jni_discover(JNIEnv *env, jobject UNUSED(obj), jlong ptr) {
     }
 }
 
+static void jni_stop(JNIEnv *env, jobject UNUSED(obj), jlong ptr) {
+    JZWay jzway = (JZWay)ptr;
+
+    ZWError err = zway_stop(jzway->zway);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static jboolean jni_is_idle(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    return (jboolean)zway_is_idle(zway);
+}
+
+static jboolean jni_is_running(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    return (jboolean)zway_is_running(zway);
+}
+
 static void jni_add_node_to_network(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jboolean startStop) {
     ZWay zway = ((JZWay)jzway)->zway;
 
@@ -364,12 +386,6 @@ static void jni_node_provisioning_dsk_remove(JNIEnv *env, jobject UNUSED(obj), j
     if (err != NoError) {
         JNI_THROW_EXCEPTION();
     }
-}
-
-static jboolean jni_is_running(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway) {
-    ZWay zway = ((JZWay)jzway)->zway;
-
-    return (jboolean)zway_is_running(zway);
 }
 
 static jlong jni_zdata_find(JNIEnv *env, jobject UNUSED(obj), jlong dh, jstring path, jlong jzway) {
@@ -994,6 +1010,9 @@ static JNINativeMethod funcs[] = {
     { "jni_zwayInit", "(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)J", (void *)&jni_zway_init },
     { "jni_finalize", "(J)V", (void *)&jni_finalize },
     { "jni_discover", "(J)V", (void *)&jni_discover },
+    { "jni_stop", "(J)V", (void *)&jni_stop },
+    { "jni_isRunning", "(J)Z", (void *)&jni_is_running },
+    { "jni_isIdle", "(J)Z", (void *)&jni_is_idle },
     { "jni_addNodeToNetwork", "(JZ)V", (void *)&jni_add_node_to_network },
     { "jni_removeNodeFromNetwork", "(JZ)V", (void *)&jni_remove_node_from_network },
     { "jni_controllerChange", "(JZ)V", (void *)&jni_controller_change },
@@ -1007,7 +1026,6 @@ static JNINativeMethod funcs[] = {
     { "jni_restore", "(J[IZ)V", (void *)&jni_restore },
     { "jni_nodeProvisioningDSKAdd", "(J[I)V", (void *)&jni_node_provisioning_dsk_add },
     { "jni_nodeProvisioningDSKRemove", "(J[I)V", (void *)&jni_node_provisioning_dsk_remove },
-    { "jni_isRunning", "(J)Z", (void *)&jni_is_running },
     { "jni_zdataFind", "(JLjava/lang/String;J)J", (void *)&jni_zdata_find },
     { "jni_zdataControllerFind", "(Ljava/lang/String;J)J", (void *)&jni_zdata_controller_find },
     { "jni_zdataDeviceFind", "(Ljava/lang/String;IJ)J", (void *)&jni_zdata_device_find },
