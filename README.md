@@ -270,6 +270,14 @@ TBD
 
 ## Ubuntu/Debian/Raspbian
 
+Produce JNI library:
+
+`make clean all`
+
+Produce a JAR package using Maven:
+
+`make mvn`
+
 ### Install
 
 Install JDK8
@@ -277,12 +285,6 @@ Install JDK8
 `sudo apt-get install openjdk-8-jdk`
 
 [Install Z-Way library](https://z-wave.me/z-way/download-z-way/)
-
-### Compiling
-
-In Terminal in the wrapper folder:
-
-`make clean all run`
 
 ### Running your or test project
 
