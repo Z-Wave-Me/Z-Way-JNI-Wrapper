@@ -12,7 +12,7 @@
 #define UNUSED(x) UNUSED_ ## x
 #endif
 
-#define JNIT_CLASS "ZWayJNIWrapper/ZWay"
+#define JNIT_CLASS "me/zwave/zway/ZWay"
 #define JNIT_CLASS_DATA JNIT_CLASS "$Data"
 
 #define JNI_THROW_EXCEPTION_INTERNAL() \

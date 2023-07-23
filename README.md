@@ -5,7 +5,7 @@ Z-Way JNI Wrapper is a Java Native Interface wrapper of the Z-Wave.Me Z-Way C li
 # Using
 
 ## Initializing the library
-Import the library using `import ZWayJNIWrapper.*;`
+Import the library using `import me.zwave.zway.*;`
 
 Create the Z-Way object and start communications with the Z-Wave chip.
 
