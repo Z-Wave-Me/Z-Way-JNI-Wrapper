@@ -176,7 +176,10 @@ def ParseFC():
         
         functionClasses = []
 
-        fcDefinition = open(libZWayDir + 'FunctionClassesPublic.h', 'r')
+        try:
+                fcDefinition = open(libZWayDir + '/libzway/' + 'FunctionClassesPublic.h', 'r')
+        except:
+                fcDefinition = open(libZWayDir + '/FunctionClasses/' + 'FunctionClassesPublic.h', 'r')
 
         for l in fcDefinition.readlines():
                 if l.strip() == "":
@@ -260,8 +263,11 @@ def ParseCC():
         
         commandClasses = []
 
-        ccDefinition = open(libZWayDir + 'CommandClassesPublic.h', 'r')
-
+        try:
+                ccDefinition = open(libZWayDir + '/libzway/' + 'CommandClassesPublic.h', 'r')
+        except:
+                ccDefinition = open(libZWayDir + '/CommandClasses/' + 'CommandClassesPublic.h', 'r')
+        
         for l in ccDefinition.readlines():
                 if l.strip() == "":
                     paramsDescriptions = Params() # new function description started
@@ -493,7 +499,7 @@ if len(sys.argv) < 4:
 
 clean = True if sys.argv[1] == "clean" else False
 
-libZWayDir = sys.argv[2] + '/libzway/'
+libZWayDir = sys.argv[2]
 
 functionClasses = ParseFC()
 commandClasses = ParseCC()
