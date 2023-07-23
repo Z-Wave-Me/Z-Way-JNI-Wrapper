@@ -1,4 +1,4 @@
-import ZWayJNIWrapper.*;
+import me.zwave.zway.*;
 
 class Main {
     private static ZWay zway;
