@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.io.*;
-import java.nio.file.Files;
 
 public final class ZWay {
     public final static int deviceAdded = 0x01;
@@ -27,34 +25,6 @@ public final class ZWay {
 
     static {
         System.loadLibrary("jzway");
-
-        try {
-            System.loadLibrary("jzway"); // try in classpath first
-        } catch (UnsatisfiedLinkError e) {
-            try {
-                // try from .JAR
-                String[] libNames = new String[] { "zcommands", "zs2", "zway", "jzway" };
-                
-                // create tmp dir
-                String javaTmpDir = System.getProperty("java.io.tmpdir");
-                File tmpDir = new File(javaTmpDir, "zway-native-libs" + System.nanoTime());
-                if (!tmpDir.mkdir()) {
-                    throw new IOException("Failed to create temp directory " + tmpDir.getName());
-                }
-                tmpDir.deleteOnExit();
-                
-                // copy libs and load them
-                for (String libName: libNames)  {
-                    InputStream is = ZWay.class.getResourceAsStream("/native/lib" + libName + ".so");
-                    File tmpFile = new File(tmpDir, "lib" + libName + ".so");
-                    tmpFile.deleteOnExit();
-                    Files.copy(is, tmpFile.toPath());
-                    System.load(tmpFile.getAbsolutePath());
-                }
-            } catch (IOException e1) {
-                throw new RuntimeException(e1);
-            }
-        }
     }
 
     public ZWay(String name, String port, int speed, String config_folder, String translations_folder, String zddx_folder) throws Exception {
