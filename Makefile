@@ -17,7 +17,7 @@ ZWAY_LIB_DIRS ?= $(ZWAY_ROOT)/libs
 ZWAY_LIBS = zway zs2 zcommons
 
 # JNI
-JNI_ROOT = /usr/lib/jvm/java-8-openjdk-amd64
+JNI_ROOT ?= /usr/lib/jvm/java-8-openjdk-amd64
 JNI_INCLUDES = -I$(JNI_ROOT)/include/ -I$(JNI_ROOT)/include/linux
 
 C_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(NATIVE_DIR)/*.c))
