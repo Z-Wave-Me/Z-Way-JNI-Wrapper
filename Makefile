@@ -9,10 +9,17 @@ SCRIPT_DIR = src/main/scripts
 NATIVE_DIR = src/main/native
 
 # Z-Way
-ZWAY_ROOT ?= /opt/z-way-server
-
-ZWAY_INC_DIRS ?= $(ZWAY_ROOT)/libzway
-ZWAY_LIB_DIRS ?= $(ZWAY_ROOT)/libs
+ifeq ($(WITH_JNI),yes)
+	ZWAY_ROOT = ../z-way
+	ZWAY_INC_DIRS = ../z-commons ../z-way ../z-way/FunctionClasses ../z-way/CommandClasses ../z-s2
+	ZWAY_LIB_DIRS = ../z-commons ../z-way ../z-s2
+	ZWAY_VERSION = $(shell git -C .. tag | grep 'v[0-9]\.[0-9]\.[0-9]' | tail -n 1 | cut -b 2-)
+else
+	ZWAY_ROOT = /opt/z-way-server
+	ZWAY_INC_DIRS = $(ZWAY_ROOT)/libzway
+	ZWAY_LIB_DIRS = $(ZWAY_ROOT)/libs
+	ZWAY_VERSION = 
+endif
 
 ZWAY_LIBS = zway zs2 zcommons
 
@@ -33,15 +40,13 @@ CFLAGS += -Wall -Werror -Wextra
 LDFLAGS += -shared
 LIBS += -lpthread -lxml2 -lz -lm -lcrypto -larchive
 
-ifeq ($(TARGET_ARCH_NAME),)
+ifeq ($(WITH_JNI),yes)
+	# for execution from inside Z-Way build
+	TARGET_ALL = $(TARGET_SO)
+else ifeq ($(TARGET_ARCH_NAME),)
 	# for standalone execution
 	VERBOSE_ECHO = @true
 	TARGET_ALL = $(TARGET_SO) $(J_OBJECTS)
-	ZWAY_VERSION = 
-else ifeq ($(WITH_JNI),yes)
-	# for execution from inside Z-Way build
-	TARGET_ALL = $(TARGET_SO)
-	ZWAY_VERSION = $(git -C .. tag | grep 'v[0-9]\.[0-9]\.[0-9]' | tail -n 1)
 endif
 
 ### Targets ###
@@ -61,7 +66,7 @@ $(TARGET_SO): $(C_OBJECTS)
 
 prepare:
 	python2 $(SCRIPT_DIR)/autogenerate_code.py generate $(ZWAY_ROOT) $(NATIVE_DIR)/jni_zway_wrapper.c $(JAVA_DIR)/ZWay.java
-	if [ -n "$(ZWAY_VERSION)" ]; then sed -i 's|<version>.*</version>|<version>'"$(git -C .. tag | grep 'v[0-9]\.[0-9]\.[0-9]' | tail -n 1)"'</version>|' pom.xml; fi
+	if [ -n "$(ZWAY_VERSION)" ]; then sed -i '0,/<version>/ { s|<version>.*</version>|<version>'"$(ZWAY_VERSION)"'</version>| }' pom.xml; fi
 	mkdir -p $(TARGET)
 	
 clean:
