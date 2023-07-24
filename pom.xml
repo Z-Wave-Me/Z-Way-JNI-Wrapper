@@ -57,4 +57,52 @@
     </repository>
   </distributionManagement>
   
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>autoclean_code</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>python2</executable>
+              <workingDirectory></workingDirectory>
+              <arguments>
+                <argument>src/main/scripts/autogenerate_code.py</argument>
+                <argument>clean</argument>
+                <argument>${zway.root}</argument>
+                <argument>src/main/native/jni_zway_wrapper.c</argument>
+                <argument>src/main/java/me/zwave/zway/ZWay.java</argument>
+              </arguments>    
+            </configuration>
+          </execution>
+          <execution>
+            <id>autogenerate_code</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>python2</executable>
+              <workingDirectory></workingDirectory>
+              <arguments>
+                <argument>src/main/scripts/autogenerate_code.py</argument>
+                <argument>generate</argument>
+                <argument>${zway.root}</argument>
+                <argument>src/main/native/jni_zway_wrapper.c</argument>
+                <argument>src/main/java/me/zwave/zway/ZWay.java</argument>
+              </arguments>    
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
