@@ -264,15 +264,45 @@ Note that for Set and Get commands the callback will be called on delivery confi
 
 ## Cleanup
 
-TBD
+Memory is cleaned with a finalizer on garbage colleaction of each ZWay.Data object.
+
+To stop Z-Way library, use `zway.stop()` and `zway.terminate()` functions.
+
+# Dependency
+
+This library can be built from sources (see *Building* section below) or added via Maven dependecies.
+
+## Maven
+
+```
+<dependency>
+  <groupId>me.zwave</groupId>
+  <artifactId>zway</artifactId>
+  <version>4.1.1</version>
+</dependency>
+```
+
+## Gradle
+
+```
+compile group: 'me.zwave', name: 'zway', version: '4.1.1'
+```
 
 # Building
 
 ## Ubuntu/Debian/Raspbian
 
+### Building the library
+
 Produce JNI library:
 
 `make clean all`
+
+You might need to specify the path to the jni folder:
+
+`JNI_ROOT=/usr/lib/jvm/java-8-openjdk-armhf make clean all`
+
+### Building the JAR package
 
 Produce a JAR package using Maven:
 
@@ -288,7 +318,7 @@ Install JDK8
 
 ### Running your or test project
 
-Only one software at time can speak with the Z-WAve hardware port!
+*Only one software at time can speak with the Z-WAve hardware port!*
 
 Stop Z-Way server (or disable the app using the Z-Wave hardware port) before running your app:
 
@@ -296,4 +326,4 @@ Stop Z-Way server (or disable the app using the Z-Wave hardware port) before run
 
 Run the test project:
 
-`make run`
+`make mvn run`
