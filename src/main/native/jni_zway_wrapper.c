@@ -60,6 +60,8 @@ typedef struct JDataArg * JDataArg;
 // Forward declarations
 
 static void statusCallback(const ZWay zway, ZWBOOL result, void *jarg);
+static void successCallback(const ZWay zway, ZWBYTE funcId, void *jarg);
+static void failureCallback(const ZWay zway, ZWBYTE funcId, void *jarg);
 static void dataCallback(const ZWay zway, ZWDataChangeType type, ZDataHolder dh, void *jarg);
 static void deviceCallback(const ZWay zway, ZWDeviceChangeType type, ZWNODE node_id, ZWBYTE instance_id, ZWBYTE command_class_id, void *jarg);
 static void terminateCallback(const ZWay zway, void* arg);
