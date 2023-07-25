@@ -390,6 +390,116 @@ static void jni_node_provisioning_dsk_remove(JNIEnv *env, jobject UNUSED(obj), j
     }
 }
 
+static void jni_device_send_nop(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint node_id, jobject arg) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    JArg jarg = (JArg)malloc(sizeof(struct JArg));
+    jarg->jzway = (JZWay)jzway;
+    jarg->arg = (void *)((*env)->NewGlobalRef(env, arg));
+
+    ZWError err = zway_device_send_nop(zway, (ZWNODE)node_id, (ZJobCustomCallback) successCallback, (ZJobCustomCallback) failureCallback, (void*)jarg);
+
+    if (err != NoError) {
+        free(jarg);
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_awake_queue(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway, jint node_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    zway_device_awake_queue((const ZWay)zway, (ZWNODE)node_id);
+}
+
+static void jni_device_interview_force(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_interview_force((const ZWay)zway, (ZWNODE)device_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static jboolean jni_device_is_interview_done(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway, jint device_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWBOOL ret = zway_device_is_interview_done((const ZWay)zway, (ZWNODE)device_id);
+
+    return (jboolean)ret;
+}
+
+static void jni_device_delay_communication(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint delay) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_delay_communication(zway, (ZWNODE)device_id, delay);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_assign_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint node_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_assign_return_route((const ZWay)zway, (ZWNODE) device_id, (ZWNODE) node_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_assign_priority_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint node_id, jint repeater1, jint repeater2, jint repeater3, jint repeater4) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_assign_priority_return_route((const ZWay)zway, (ZWNODE) device_id, (ZWNODE) node_id, (ZWBYTE) repeater1, (ZWBYTE) repeater2, (ZWBYTE) repeater3, (ZWBYTE) repeater4);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_delete_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_delete_return_route((const ZWay)zway, (ZWNODE) device_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_assign_suc_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_assign_suc_return_route((const ZWay)zway, (ZWNODE) device_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_assign_priority_suc_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint repeater1, jint repeater2, jint repeater3, jint repeater4) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_assign_priority_suc_return_route((const ZWay)zway, (ZWNODE) device_id, (ZWBYTE) repeater1, (ZWBYTE) repeater2, (ZWBYTE) repeater3, (ZWBYTE) repeater4);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_delete_suc_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_delete_suc_return_route((const ZWay)zway, (ZWNODE) device_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+// zdata functions
+
 static jlong jni_zdata_find(JNIEnv *env, jobject UNUSED(obj), jlong dh, jstring path, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
     jzdata->jzway = (JZWay)jzway;
@@ -1028,6 +1138,17 @@ static JNINativeMethod funcs[] = {
     { "jni_restore", "(J[IZ)V", (void *)&jni_restore },
     { "jni_nodeProvisioningDSKAdd", "(J[I)V", (void *)&jni_node_provisioning_dsk_add },
     { "jni_nodeProvisioningDSKRemove", "(J[I)V", (void *)&jni_node_provisioning_dsk_remove },
+    { "jni_deviceSendNOP", "(JILjava/lang/Object;)V", (void *)&jni_device_send_nop },
+    { "jni_deviceAwakeQueue", "(JI)V", (void *)&jni_device_awake_queue },
+    { "jni_deviceInterviewForce", "(JI)V", (void *)&jni_device_interview_force },
+    { "jni_deviceIsInterviewDone", "(JI)B", (void *)&jni_device_is_interview_done },
+    { "jni_deviceDelayCommunication", "(JII)V", (void *)&jni_device_delay_communication },
+    { "jni_deviceAssignReturnRoute", "(JII)V", (void *)&jni_device_assign_return_route },
+    { "jni_deviceAssignPriorityReturnRoute", "(JIIIIII)V", (void *)&jni_device_assign_priority_return_route },
+    { "jni_deviceDeleteReturnRoute", "(JI)V", (void *)&jni_device_delete_return_route },
+    { "jni_deviceAssignSUCReturnRoute", "(JI)V", (void *)&jni_device_assign_suc_return_route },
+    { "jni_deviceAssignPrioritySUCReturnRoute", "(JIIIII)V", (void *)&jni_device_assign_priority_suc_return_route },
+    { "jni_deviceDeleteSUCReturnRoute", "(JI)V", (void *)&jni_device_delete_suc_return_route },
     { "jni_zdataFind", "(JLjava/lang/String;J)J", (void *)&jni_zdata_find },
     { "jni_zdataControllerFind", "(Ljava/lang/String;J)J", (void *)&jni_zdata_controller_find },
     { "jni_zdataDeviceFind", "(Ljava/lang/String;IJ)J", (void *)&jni_zdata_device_find },
