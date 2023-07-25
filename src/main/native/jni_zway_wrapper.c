@@ -498,6 +498,27 @@ static void jni_device_delete_suc_return_route(JNIEnv *env, jobject UNUSED(obj),
         JNI_THROW_EXCEPTION();
     }
 }
+
+static void jni_command_interview(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint instance_id, jint cc_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_command_interview((const ZWay)zway, (ZWNODE) device_id, (ZWBYTE) instance_id, (ZWBYTE) cc_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_zddx_save_to_xml(JNIEnv *env, jobject UNUSED(obj), jlong jzway) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zddx_save_to_xml((const ZWay)zway);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
 // zdata functions
 
 static jlong jni_zdata_find(JNIEnv *env, jobject UNUSED(obj), jlong dh, jstring path, jlong jzway) {
@@ -1149,6 +1170,8 @@ static JNINativeMethod funcs[] = {
     { "jni_deviceAssignSUCReturnRoute", "(JI)V", (void *)&jni_device_assign_suc_return_route },
     { "jni_deviceAssignPrioritySUCReturnRoute", "(JIIIII)V", (void *)&jni_device_assign_priority_suc_return_route },
     { "jni_deviceDeleteSUCReturnRoute", "(JI)V", (void *)&jni_device_delete_suc_return_route },
+    { "jni_commandInterview", "(JIII)V", (void *)&jni_command_interview },
+    { "jni_ZDDXSaveToXML", "(J)V", (void *)&jni_zddx_save_to_xml },
     { "jni_zdataFind", "(JLjava/lang/String;J)J", (void *)&jni_zdata_find },
     { "jni_zdataControllerFind", "(Ljava/lang/String;J)J", (void *)&jni_zdata_controller_find },
     { "jni_zdataDeviceFind", "(Ljava/lang/String;IJ)J", (void *)&jni_zdata_device_find },
