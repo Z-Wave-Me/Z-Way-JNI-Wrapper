@@ -20,3 +20,6 @@ translation
 # Editors
 .idea
 *~
+
+# MVN
+target

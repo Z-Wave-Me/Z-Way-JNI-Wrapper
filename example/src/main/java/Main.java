@@ -1,4 +1,4 @@
-import ZWayJNIWrapper.*;
+import me.zwave.zway.*;
 
 class Main {
     private static ZWay zway;
@@ -97,7 +97,7 @@ class Main {
         ZWay zway;
         try {
             System.out.println("init zway");
-            zway = new ZWay("zway", "/dev/ttyACM0", 115200, "z-way-root/config", "z-way-root/translations", "z-way-root/ZDDX");
+            zway = new ZWay("zway", "/dev/ttyUSB0", 115200, "/opt/z-way-server/config", "/opt/z-way-server/translations", "/opt/z-way-server/ZDDX");
         } catch (java.lang.Exception e) {
             System.out.println(e);
             throw new RuntimeException();

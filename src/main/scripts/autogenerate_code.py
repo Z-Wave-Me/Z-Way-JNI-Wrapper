@@ -5,8 +5,6 @@ import os
 import sys
 import subprocess
 
-libZWayDir = 'z-way-root/libzway/'
-
 class CommandClass:
     def __init__(self, name, id):
         self.name = name
@@ -178,7 +176,10 @@ def ParseFC():
         
         functionClasses = []
 
-        fcDefinition = open(libZWayDir + 'FunctionClassesPublic.h', 'r')
+        try:
+                fcDefinition = open(libZWayDir + '/libzway/' + 'FunctionClassesPublic.h', 'r')
+        except:
+                fcDefinition = open(libZWayDir + '/FunctionClasses/' + 'FunctionClassesPublic.h', 'r')
 
         for l in fcDefinition.readlines():
                 if l.strip() == "":
@@ -262,8 +263,11 @@ def ParseCC():
         
         commandClasses = []
 
-        ccDefinition = open(libZWayDir + 'CommandClassesPublic.h', 'r')
-
+        try:
+                ccDefinition = open(libZWayDir + '/libzway/' + 'CommandClassesPublic.h', 'r')
+        except:
+                ccDefinition = open(libZWayDir + '/CommandClasses/' + 'CommandClassesPublic.h', 'r')
+        
         for l in ccDefinition.readlines():
                 if l.strip() == "":
                     paramsDescriptions = Params() # new function description started
@@ -489,10 +493,16 @@ def GenerateCodeCC(template):
                                 code.append(GenerateCodeCCLine(line, cc))
         return code
 
-clean = True if len(sys.argv) >= 2 and sys.argv[1] == "clean" else False
+if len(sys.argv) < 4:
+        print("Usage: " + sys.argv[0] + " (clean|generate) z-way-root-dir file1 [file2] ...]")
+        exit(1)
+
+clean = True if sys.argv[1] == "clean" else False
+
+libZWayDir = sys.argv[2]
 
 functionClasses = ParseFC()
 commandClasses = ParseCC()
 
-ParseFile("jni_zway_wrapper.c", clean)
-ParseFile("ZWayJNIWrapper/ZWay.java", clean)
+for i in range(3, len(sys.argv)):
+        ParseFile(sys.argv[i], clean)
