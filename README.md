@@ -27,7 +27,7 @@ try {
 `new ZWay` loads the library and initialize required strutures. This call expects the following arguments:
 - Name of the instance (for logging purpose, any string can be used).
 - Path to the Z-Wave hardware port.
-- Baudrate (in most cases it is 115200 but for larg networks you might want to switch your hardware to a faster speed).
+- Baud rate (in most cases it is 115200, but for large networks you might want to switch your hardware to a faster speed).
 - Path to the configuration file where all interview information is saved. You can use the same folder as z-way-server is using to be able to run z-way-server and your app (but only one at a time!).
 - Path to translation files (shipped with Z-Way).
 - Path to the ZDDX database files (shipped with Z-Way). You can point to an empty folder to skip using this database (only old non-Z-Wave Plus devices require this database for proper operation).
@@ -109,8 +109,8 @@ Getting controller object, device object, Instance Object and Command Class obje
 ZWay.Controller controller = zway.controller;
 ZWay.Device device = zway.devices.get(nodeId);
 ZWay.Device.Instance instance = zway.devices.get(nodeId).instances.get(instanceId);
-ZWay.Device.Instance.SwitchBinary switchBinary = zway.devices.get(nodeId).instances.get(instanceId).commandClassesByName.get("switchBinary");
-ZWay.Device.Instance.SwitchBinary switchBinary = zway.devices.get(nodeId).instances.get(instanceId).commandClassesById.get(0x25);
+ZWay.Device.Instance.SwitchBinary switchBinary = (ZWay.Device.Instance.SwitchBinary) zway.devices.get(nodeId).instances.get(instanceId).commandClassesByName.get("switchBinary");
+ZWay.Device.Instance.SwitchBinary switchBinary = (ZWay.Device.Instance.SwitchBinary) zway.devices.get(nodeId).instances.get(instanceId).commandClassesById.get(0x25);
 ```
 devices, instances and commandClassesBy* are iterable lists.
 
@@ -181,7 +181,7 @@ Change type is one of the:
 * `ZWay.Data.updated` (data was updated)
 * `ZWay.Data.invalidated` (data was marked as outdated and new value is expected)
 * `ZWay.Data.deleted` (this is the last update of the device before it is deleted, all further operations on this object will raise NotAlive)
-* `ZWay.Data.BchildCreated` (child data element was created)
+* `ZWay.Data.childCreated` (child data element was created)
 * `ZWay.Data.phantomUpdate` (bit flag, set if the data value is updated, but the new value is the same as the old one)
 
 Unsubscribing the handler:
@@ -192,7 +192,7 @@ levelData.unbind(myDataCbk);
 ## Calling Command Classes methods:
 
 ```
-ZWay.Device.Instance.SwitchBinary switchBinary = zway.devices.get(nodeId).instances.get(instanceId).commandClassesByName.get("switchBinary");
+ZWay.Device.Instance.SwitchBinary switchBinary = (ZWay.Device.Instance.SwitchBinary) zway.devices.get(nodeId).instances.get(instanceId).commandClassesByName.get("switchBinary");
 switchBinary.get();
 switchBinary.set(s, 0);
 ```
@@ -315,6 +315,10 @@ Install JDK8
 `sudo apt-get install openjdk-8-jdk`
 
 [Install Z-Way library](https://z-wave.me/z-way/download-z-way/)
+
+Install Maven
+
+`sudo apt-get install maven`
 
 ### Running your or test project
 
