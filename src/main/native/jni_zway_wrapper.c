@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <jni.h>
 
 #include <ZWayLib.h>
@@ -157,16 +158,16 @@ static jlong jni_zway_init(JNIEnv *env, jobject obj, jstring name, jstring port,
         JNI_THROW_EXCEPTION_RET(0);
     }
 
-    return (jlong)jzway;
+    return (jlong)(uintptr_t)jzway;
 }
 
 static void jni_finalize(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong ptr) {
-    free((JZWay)ptr);
+    free((JZWay)(uintptr_t)ptr);
 }
 
 
 static void jni_discover(JNIEnv *env, jobject UNUSED(obj), jlong ptr) {
-    JZWay jzway = (JZWay)ptr;
+    JZWay jzway = (JZWay)(uintptr_t)ptr;
 
     ZWError err = zway_discover(jzway->zway);
 
@@ -176,7 +177,7 @@ static void jni_discover(JNIEnv *env, jobject UNUSED(obj), jlong ptr) {
 }
 
 static void jni_add_node_to_network(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jboolean startStop) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_controller_add_node_to_network(zway, startStop);
 
@@ -186,7 +187,7 @@ static void jni_add_node_to_network(JNIEnv *env, jobject UNUSED(obj), jlong jzwa
 }
 
 static void jni_remove_node_from_network(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jboolean startStop) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_controller_remove_node_from_network(zway, startStop);
 
@@ -196,7 +197,7 @@ static void jni_remove_node_from_network(JNIEnv *env, jobject UNUSED(obj), jlong
 }
 
 static void jni_controller_change(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jboolean startStop) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_controller_change(zway, startStop);
 
@@ -206,7 +207,7 @@ static void jni_controller_change(JNIEnv *env, jobject UNUSED(obj), jlong jzway,
 }
 
 static void jni_set_suc_node_id(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint node_id) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_controller_set_suc_node_id(zway, node_id);
 
@@ -216,7 +217,7 @@ static void jni_set_suc_node_id(JNIEnv *env, jobject UNUSED(obj), jlong jzway, j
 }
 
 static void jni_set_sis_node_id(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint node_id) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_controller_set_sis_node_id(zway, node_id);
 
@@ -226,7 +227,7 @@ static void jni_set_sis_node_id(JNIEnv *env, jobject UNUSED(obj), jlong jzway, j
 }
 
 static void jni_disable_suc_node_id(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint node_id) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_controller_disable_suc_node_id(zway, node_id);
 
@@ -236,7 +237,7 @@ static void jni_disable_suc_node_id(JNIEnv *env, jobject UNUSED(obj), jlong jzwa
 }
 
 static void jni_set_default(JNIEnv *env, jobject UNUSED(obj), jlong jzway) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_controller_set_default(zway);
 
@@ -246,7 +247,7 @@ static void jni_set_default(JNIEnv *env, jobject UNUSED(obj), jlong jzway) {
 }
 
 static void jni_request_network_update(JNIEnv *env, jobject UNUSED(obj), jlong jzway) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     int node_id;
     int suc_node_id;
@@ -279,7 +280,7 @@ static void jni_request_network_update(JNIEnv *env, jobject UNUSED(obj), jlong j
 }
 
 static void jni_set_learn_mode(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jboolean startStop) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_controller_set_learn_mode(zway, startStop);
 
@@ -289,7 +290,7 @@ static void jni_set_learn_mode(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jb
 }
 
 static jintArray jni_backup(JNIEnv *env, jobject UNUSED(obj), jlong jzway) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWBYTE *backupData;
     size_t backupSize;
@@ -310,7 +311,7 @@ static jintArray jni_backup(JNIEnv *env, jobject UNUSED(obj), jlong jzway) {
 }
 
 static void jni_restore(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jintArray data, jboolean full) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     jint *c_int_data = (*env)->GetIntArrayElements(env, data, NULL);
     jsize length = (*env)->GetArrayLength(env, data);
@@ -329,7 +330,7 @@ static void jni_restore(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jintArray
 }
 
 static void jni_node_provisioning_dsk_add(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jintArray dsk) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     jint *c_int_dsk = (*env)->GetIntArrayElements(env, dsk, NULL);
     jsize length = (*env)->GetArrayLength(env, dsk);
@@ -348,7 +349,7 @@ static void jni_node_provisioning_dsk_add(JNIEnv *env, jobject UNUSED(obj), jlon
 }
 
 static void jni_node_provisioning_dsk_remove(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jintArray dsk) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     jint *c_int_dsk = (*env)->GetIntArrayElements(env, dsk, NULL);
     jsize length = (*env)->GetArrayLength(env, dsk);
@@ -367,30 +368,30 @@ static void jni_node_provisioning_dsk_remove(JNIEnv *env, jobject UNUSED(obj), j
 }
 
 static jboolean jni_is_running(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     return (jboolean)zway_is_running(zway);
 }
 
 static jlong jni_zdata_find(JNIEnv *env, jobject UNUSED(obj), jlong dh, jstring path, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
-    jzdata->jzway = (JZWay)jzway;
+    jzdata->jzway = (JZWay)(uintptr_t)jzway;
     jzdata->self = NULL;
 
     const char *str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
-    jzdata->dh = zdata_find(((JZData)dh)->dh, str_path);
+    jzdata->dh = zdata_find(((JZData)(uintptr_t)dh)->dh, str_path);
     zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
 
     (*env)->ReleaseStringUTFChars(env, path, str_path);
 
-    return (jlong)jzdata;
+    return (jlong)(uintptr_t)jzdata;
 }
 
 static jlong jni_zdata_controller_find(JNIEnv *env, jobject UNUSED(obj), jstring path, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
-    jzdata->jzway = (JZWay)jzway;
+    jzdata->jzway = (JZWay)(uintptr_t)jzway;
     jzdata->self = NULL;
 
     const char *str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
@@ -401,12 +402,12 @@ static jlong jni_zdata_controller_find(JNIEnv *env, jobject UNUSED(obj), jstring
 
     (*env)->ReleaseStringUTFChars(env, path, str_path);
 
-    return (jlong)jzdata;
+    return (jlong)(uintptr_t)jzdata;
 }
 
 static jlong jni_zdata_device_find(JNIEnv *env, jobject UNUSED(obj), jstring path, jint device_id, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
-    jzdata->jzway = (JZWay)jzway;
+    jzdata->jzway = (JZWay)(uintptr_t)jzway;
     jzdata->self = NULL;
 
     const char *str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
@@ -417,12 +418,12 @@ static jlong jni_zdata_device_find(JNIEnv *env, jobject UNUSED(obj), jstring pat
 
     (*env)->ReleaseStringUTFChars(env, path, str_path);
 
-    return (jlong)jzdata;
+    return (jlong)(uintptr_t)jzdata;
 }
 
 static jlong jni_zdata_instance_find(JNIEnv *env, jobject UNUSED(obj), jstring path, jint device_id, jint instance_id, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
-    jzdata->jzway = (JZWay)jzway;
+    jzdata->jzway = (JZWay)(uintptr_t)jzway;
     jzdata->self = NULL;
 
     const char *str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
@@ -433,12 +434,12 @@ static jlong jni_zdata_instance_find(JNIEnv *env, jobject UNUSED(obj), jstring p
 
     (*env)->ReleaseStringUTFChars(env, path, str_path);
 
-    return (jlong)jzdata;
+    return (jlong)(uintptr_t)jzdata;
 }
 
 static jlong jni_zdata_command_class_find(JNIEnv *env, jobject UNUSED(obj), jstring path, jint device_id, jint instance_id, jint command_class_id, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
-    jzdata->jzway = (JZWay)jzway;
+    jzdata->jzway = (JZWay)(uintptr_t)jzway;
     jzdata->self = NULL;
 
     const char *str_path = (*env)->GetStringUTFChars(env, path, JNI_FALSE);
@@ -449,11 +450,11 @@ static jlong jni_zdata_command_class_find(JNIEnv *env, jobject UNUSED(obj), jstr
 
     (*env)->ReleaseStringUTFChars(env, path, str_path);
 
-    return (jlong)jzdata;
+    return (jlong)(uintptr_t)jzdata;
 }
 
 static void jni_zdata_add_callback(JNIEnv *env, jobject obj, jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
     
     if (jzdata->self == NULL) {
         jzdata->self = (*env)->NewGlobalRef(env, obj);
@@ -468,7 +469,7 @@ static void jni_zdata_add_callback(JNIEnv *env, jobject obj, jlong dh) {
 }
 
 static void jni_zdata_remove_callback(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     ZWError err = zdata_remove_callback(jzdata->dh, (ZDataChangeCallback)&dataCallback);
@@ -482,7 +483,7 @@ static void jni_zdata_remove_callback(JNIEnv *env, jobject UNUSED(obj), jlong dh
 static jstring jni_zdata_get_name(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
     const char *str_name;
 
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     str_name = zdata_get_name(jzdata->dh);
@@ -494,7 +495,7 @@ static jstring jni_zdata_get_name(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
 static jstring jni_zdata_get_path(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
     const char *str_name;
 
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     str_name = zdata_get_path(jzdata->dh);
@@ -504,7 +505,7 @@ static jstring jni_zdata_get_path(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
 }
 
 static jint jni_zdata_get_type(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     ZWDataType type;
 
@@ -520,7 +521,7 @@ static jint jni_zdata_get_type(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
 }
 
 static jlongArray jni_zdata_get_children(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     int length = 0;
 
@@ -538,8 +539,8 @@ static jlongArray jni_zdata_get_children(JNIEnv *env, jobject UNUSED(obj), jlong
         
     child = zdata_first_child((const ZDataHolder)jzdata->dh);
     for (int i = 0; i < length; i++) {
-        jzchild->jzway = ((JZData)dh)->jzway;
-        jzchild->self = ((JZData)dh)->self;
+        jzchild->jzway = ((JZData)(uintptr_t)dh)->jzway;
+        jzchild->self = ((JZData)(uintptr_t)dh)->self;
         jzchild->dh = child->data;
         fill[i] = (long) jzchild;
         child = zdata_next_child(child);
@@ -558,7 +559,7 @@ static jlongArray jni_zdata_get_children(JNIEnv *env, jobject UNUSED(obj), jlong
 // zdata value: get by type
 
 static jboolean jni_zdata_get_boolean(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     ZWBOOL ret;
 
@@ -575,7 +576,7 @@ static jboolean jni_zdata_get_boolean(JNIEnv *env, jobject UNUSED(obj), jlong dh
 }
 
 static jint jni_zdata_get_integer(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     int ret;
 
@@ -592,7 +593,7 @@ static jint jni_zdata_get_integer(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
 }
 
 static jfloat jni_zdata_get_float(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     float ret;
 
@@ -609,7 +610,7 @@ static jfloat jni_zdata_get_float(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
 }
 
 static jstring jni_zdata_get_string(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     ZWCSTR ret;
 
@@ -626,7 +627,7 @@ static jstring jni_zdata_get_string(JNIEnv *env, jobject UNUSED(obj), jlong dh) 
 }
 
 static jintArray jni_zdata_get_binary(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     ZWBYTE* ret;
     size_t length;
@@ -651,7 +652,7 @@ static jintArray jni_zdata_get_binary(JNIEnv *env, jobject UNUSED(obj), jlong dh
 }
 
 static jintArray jni_zdata_get_intArray(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     int* ret;
     size_t length;
@@ -676,7 +677,7 @@ static jintArray jni_zdata_get_intArray(JNIEnv *env, jobject UNUSED(obj), jlong 
 }
 
 static jfloatArray jni_zdata_get_floatArray(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     float* ret;
     size_t length;
@@ -701,7 +702,7 @@ static jfloatArray jni_zdata_get_floatArray(JNIEnv *env, jobject UNUSED(obj), jl
 }
 
 static jobjectArray jni_zdata_get_stringArray(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     ZWCSTR* ret;
     size_t length;
@@ -727,7 +728,7 @@ static jobjectArray jni_zdata_get_stringArray(JNIEnv *env, jobject UNUSED(obj), 
 // zdata value: set by type
 
 static void jni_zdata_set_empty(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     ZWError err = zdata_set_empty(jzdata->dh);
@@ -740,7 +741,7 @@ static void jni_zdata_set_empty(JNIEnv *env, jobject UNUSED(obj), jlong dh) {
 
 
 static void jni_zdata_set_boolean(JNIEnv *env, jobject UNUSED(obj), jlong dh, jboolean data) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     ZWError err = zdata_set_boolean(jzdata->dh, data);
@@ -752,7 +753,7 @@ static void jni_zdata_set_boolean(JNIEnv *env, jobject UNUSED(obj), jlong dh, jb
 }
 
 static void jni_zdata_set_integer(JNIEnv *env, jobject UNUSED(obj), jlong dh, jint data) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     ZWError err = zdata_set_integer(jzdata->dh, data);
@@ -764,7 +765,7 @@ static void jni_zdata_set_integer(JNIEnv *env, jobject UNUSED(obj), jlong dh, ji
 }
 
 static void jni_zdata_set_float(JNIEnv *env, jobject UNUSED(obj), jlong dh, jfloat data) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     ZWError err = zdata_set_float(jzdata->dh, data);
@@ -776,7 +777,7 @@ static void jni_zdata_set_float(JNIEnv *env, jobject UNUSED(obj), jlong dh, jflo
 }
 
 static void jni_zdata_set_string(JNIEnv *env, jobject UNUSED(obj), jlong dh, jstring data) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     const char *str_data = (*env)->GetStringUTFChars(env, data, JNI_FALSE);
 
@@ -790,7 +791,7 @@ static void jni_zdata_set_string(JNIEnv *env, jobject UNUSED(obj), jlong dh, jst
 }
 
 static void jni_zdata_set_binary(JNIEnv *env, jobject UNUSED(obj), jlong dh, jintArray data) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     jint *c_int_data = (*env)->GetIntArrayElements(env, data, NULL);
     jsize length = (*env)->GetArrayLength(env, data);
@@ -814,7 +815,7 @@ static void jni_zdata_set_binary(JNIEnv *env, jobject UNUSED(obj), jlong dh, jin
 }
 
 static void jni_zdata_set_intArray(JNIEnv *env, jobject UNUSED(obj), jlong dh, jintArray data) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     jint *cdata = (*env)->GetIntArrayElements(env, data, NULL);
     jsize length = (*env)->GetArrayLength(env, data);
@@ -831,7 +832,7 @@ static void jni_zdata_set_intArray(JNIEnv *env, jobject UNUSED(obj), jlong dh, j
 }
 
 static void jni_zdata_set_floatArray(JNIEnv *env, jobject UNUSED(obj), jlong dh, jfloatArray data) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     jfloat *cdata = (*env)->GetFloatArrayElements(env, data, NULL);
     jsize length = (*env)->GetArrayLength(env, data);
@@ -848,7 +849,7 @@ static void jni_zdata_set_floatArray(JNIEnv *env, jobject UNUSED(obj), jlong dh,
 }
 
 static void jni_zdata_set_stringArray(JNIEnv *env, jobject UNUSED(obj), jlong dh, jobjectArray data) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     jsize length = (*env)->GetArrayLength(env, data);
 
@@ -903,7 +904,7 @@ static void dataCallback(const ZWay UNUSED(zway), ZWDataChangeType type, ZDataHo
 }
 
 static void deviceCallback(const ZWay UNUSED(zway), ZWDeviceChangeType type, ZWNODE node_id, ZWBYTE instance_id, ZWBYTE command_class_id, void *arg) {
-    JZWay jzway = (JZWay)arg;
+    JZWay jzway = (JZWay)(uintptr_t)arg;
 
     JNIEnv* env;
     (*(jzway->jvm))->AttachCurrentThread(jzway->jvm, (void**) &env, NULL);
@@ -912,7 +913,7 @@ static void deviceCallback(const ZWay UNUSED(zway), ZWDeviceChangeType type, ZWN
 }
 
 static void terminateCallback(const ZWay UNUSED(zway), void* arg) {
-    JZWay jzway = (JZWay)arg;
+    JZWay jzway = (JZWay)(uintptr_t)arg;
 
     JNIEnv* env;
     (*(jzway->jvm))->AttachCurrentThread(jzway->jvm, (void**) &env, NULL);
@@ -926,10 +927,10 @@ static void terminateCallback(const ZWay UNUSED(zway), void* arg) {
 
 /* BEGIN AUTOGENERATED FC TEMPLATE
 static void jni_fc_%function_short_name%(JNIEnv *env, jobject UNUSED(obj), jlong jzway, %params_jni_declarations%jobject arg) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     JArg jarg = (JArg)malloc(sizeof(struct JArg));
-    jarg->jzway = (JZWay)jzway;
+    jarg->jzway = (JZWay)(uintptr_t)jzway;
     jarg->arg = (void *)((*env)->NewGlobalRef(env, arg));
 
     %params_parser%
@@ -950,10 +951,10 @@ static void jni_fc_%function_short_name%(JNIEnv *env, jobject UNUSED(obj), jlong
 /* BEGIN AUTOGENERATED CC TEMPLATE
  * BEGIN AUTOGENERATED CMD TEMPLATE
 static void jni_cc_%function_short_name%(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint deviceId, jint instanceId, %params_jni_declarations%jobject arg) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     JArg jarg = (JArg)malloc(sizeof(struct JArg));
-    jarg->jzway = (JZWay)jzway;
+    jarg->jzway = (JZWay)(uintptr_t)jzway;
     jarg->arg = (void *)((*env)->NewGlobalRef(env, arg));
 
     %params_parser%
