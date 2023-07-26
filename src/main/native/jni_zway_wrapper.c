@@ -61,6 +61,8 @@ typedef struct JDataArg * JDataArg;
 // Forward declarations
 
 static void statusCallback(const ZWay zway, ZWBOOL result, void *jarg);
+static void successCallback(const ZWay zway, ZWBYTE funcId, void *jarg);
+static void failureCallback(const ZWay zway, ZWBYTE funcId, void *jarg);
 static void dataCallback(const ZWay zway, ZWDataChangeType type, ZDataHolder dh, void *jarg);
 static void deviceCallback(const ZWay zway, ZWDeviceChangeType type, ZWNODE node_id, ZWBYTE instance_id, ZWBYTE command_class_id, void *jarg);
 static void terminateCallback(const ZWay zway, void* arg);
@@ -174,6 +176,28 @@ static void jni_discover(JNIEnv *env, jobject UNUSED(obj), jlong ptr) {
     if (err != NoError) {
         JNI_THROW_EXCEPTION();
     }
+}
+
+static void jni_stop(JNIEnv *env, jobject UNUSED(obj), jlong ptr) {
+    JZWay jzway = (JZWay)ptr;
+
+    ZWError err = zway_stop(jzway->zway);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static jboolean jni_is_idle(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    return (jboolean)zway_is_idle(zway);
+}
+
+static jboolean jni_is_running(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    return (jboolean)zway_is_running(zway);
 }
 
 static void jni_add_node_to_network(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jboolean startStop) {
@@ -367,11 +391,136 @@ static void jni_node_provisioning_dsk_remove(JNIEnv *env, jobject UNUSED(obj), j
     }
 }
 
-static jboolean jni_is_running(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway) {
+static void jni_device_send_nop(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint node_id, jobject arg) {
     ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
-    return (jboolean)zway_is_running(zway);
+    JArg jarg = (JArg)malloc(sizeof(struct JArg));
+    jarg->jzway = (JZWay)jzway;
+    jarg->arg = (void *)((*env)->NewGlobalRef(env, arg));
+
+    ZWError err = zway_device_send_nop(zway, (ZWNODE)node_id, (ZJobCustomCallback) successCallback, (ZJobCustomCallback) failureCallback, (void*)jarg);
+
+    if (err != NoError) {
+        free(jarg);
+        JNI_THROW_EXCEPTION();
+    }
 }
+
+static void jni_device_awake_queue(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway, jint node_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    zway_device_awake_queue((const ZWay)zway, (ZWNODE)node_id);
+}
+
+static void jni_device_interview_force(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_interview_force((const ZWay)zway, (ZWNODE)device_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static jboolean jni_device_is_interview_done(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway, jint device_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWBOOL ret = zway_device_is_interview_done((const ZWay)zway, (ZWNODE)device_id);
+
+    return (jboolean)ret;
+}
+
+static void jni_device_delay_communication(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint delay) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_delay_communication(zway, (ZWNODE)device_id, delay);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_assign_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint node_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_assign_return_route((const ZWay)zway, (ZWNODE) device_id, (ZWNODE) node_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_assign_priority_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint node_id, jint repeater1, jint repeater2, jint repeater3, jint repeater4) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_assign_priority_return_route((const ZWay)zway, (ZWNODE) device_id, (ZWNODE) node_id, (ZWBYTE) repeater1, (ZWBYTE) repeater2, (ZWBYTE) repeater3, (ZWBYTE) repeater4);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_delete_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_delete_return_route((const ZWay)zway, (ZWNODE) device_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_assign_suc_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_assign_suc_return_route((const ZWay)zway, (ZWNODE) device_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_assign_priority_suc_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint repeater1, jint repeater2, jint repeater3, jint repeater4) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_assign_priority_suc_return_route((const ZWay)zway, (ZWNODE) device_id, (ZWBYTE) repeater1, (ZWBYTE) repeater2, (ZWBYTE) repeater3, (ZWBYTE) repeater4);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_device_delete_suc_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_device_delete_suc_return_route((const ZWay)zway, (ZWNODE) device_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_command_interview(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint instance_id, jint cc_id) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zway_command_interview((const ZWay)zway, (ZWNODE) device_id, (ZWBYTE) instance_id, (ZWBYTE) cc_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+static void jni_zddx_save_to_xml(JNIEnv *env, jobject UNUSED(obj), jlong jzway) {
+    ZWay zway = ((JZWay)jzway)->zway;
+
+    ZWError err = zddx_save_to_xml((const ZWay)zway);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
+// zdata functions
 
 static jlong jni_zdata_find(JNIEnv *env, jobject UNUSED(obj), jlong dh, jstring path, jlong jzway) {
     JZData jzdata = (JZData)malloc(sizeof(struct JZData));
@@ -554,6 +703,26 @@ static jlongArray jni_zdata_get_children(JNIEnv *env, jobject UNUSED(obj), jlong
     (*env)->SetLongArrayRegion(env, jchildren, 0, length, fill);
 
     return jchildren;
+}
+
+static jlong jni_zdata_get_update_time(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong dh) {
+    JZData jzdata = (JZData)dh;
+
+    zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
+    time_t time = zdata_get_update_time(jzdata->dh);
+    zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
+
+    return time;
+}
+
+static jlong jni_zdata_get_invalidate_time(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong dh) {
+    JZData jzdata = (JZData)dh;
+
+    zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
+    time_t time = zdata_get_invalidate_time(jzdata->dh);
+    zdata_release_lock(ZDataRoot(jzdata->jzway->zway));
+
+    return time;
 }
 
 // zdata value: get by type
@@ -975,6 +1144,9 @@ static JNINativeMethod funcs[] = {
     { "jni_zwayInit", "(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)J", (void *)&jni_zway_init },
     { "jni_finalize", "(J)V", (void *)&jni_finalize },
     { "jni_discover", "(J)V", (void *)&jni_discover },
+    { "jni_stop", "(J)V", (void *)&jni_stop },
+    { "jni_isRunning", "(J)Z", (void *)&jni_is_running },
+    { "jni_isIdle", "(J)Z", (void *)&jni_is_idle },
     { "jni_addNodeToNetwork", "(JZ)V", (void *)&jni_add_node_to_network },
     { "jni_removeNodeFromNetwork", "(JZ)V", (void *)&jni_remove_node_from_network },
     { "jni_controllerChange", "(JZ)V", (void *)&jni_controller_change },
@@ -988,7 +1160,19 @@ static JNINativeMethod funcs[] = {
     { "jni_restore", "(J[IZ)V", (void *)&jni_restore },
     { "jni_nodeProvisioningDSKAdd", "(J[I)V", (void *)&jni_node_provisioning_dsk_add },
     { "jni_nodeProvisioningDSKRemove", "(J[I)V", (void *)&jni_node_provisioning_dsk_remove },
-    { "jni_isRunning", "(J)Z", (void *)&jni_is_running },
+    { "jni_deviceSendNOP", "(JILjava/lang/Object;)V", (void *)&jni_device_send_nop },
+    { "jni_deviceAwakeQueue", "(JI)V", (void *)&jni_device_awake_queue },
+    { "jni_deviceInterviewForce", "(JI)V", (void *)&jni_device_interview_force },
+    { "jni_deviceIsInterviewDone", "(JI)B", (void *)&jni_device_is_interview_done },
+    { "jni_deviceDelayCommunication", "(JII)V", (void *)&jni_device_delay_communication },
+    { "jni_deviceAssignReturnRoute", "(JII)V", (void *)&jni_device_assign_return_route },
+    { "jni_deviceAssignPriorityReturnRoute", "(JIIIIII)V", (void *)&jni_device_assign_priority_return_route },
+    { "jni_deviceDeleteReturnRoute", "(JI)V", (void *)&jni_device_delete_return_route },
+    { "jni_deviceAssignSUCReturnRoute", "(JI)V", (void *)&jni_device_assign_suc_return_route },
+    { "jni_deviceAssignPrioritySUCReturnRoute", "(JIIIII)V", (void *)&jni_device_assign_priority_suc_return_route },
+    { "jni_deviceDeleteSUCReturnRoute", "(JI)V", (void *)&jni_device_delete_suc_return_route },
+    { "jni_commandInterview", "(JIII)V", (void *)&jni_command_interview },
+    { "jni_ZDDXSaveToXML", "(J)V", (void *)&jni_zddx_save_to_xml },
     { "jni_zdataFind", "(JLjava/lang/String;J)J", (void *)&jni_zdata_find },
     { "jni_zdataControllerFind", "(Ljava/lang/String;J)J", (void *)&jni_zdata_controller_find },
     { "jni_zdataDeviceFind", "(Ljava/lang/String;IJ)J", (void *)&jni_zdata_device_find },
@@ -1010,6 +1194,8 @@ static JNINativeMethod funcsData[] = {
     { "jni_zdataGetName", "(J)Ljava/lang/String;", (void *)&jni_zdata_get_name },
     { "jni_zdataGetPath", "(J)Ljava/lang/String;", (void *)&jni_zdata_get_path },
     { "jni_zdataGetChildren", "(J)[J", (void *)&jni_zdata_get_children },
+    { "jni_zdataGetUpdateTime", "(J)J", (void *)&jni_zdata_get_update_time },
+    { "jni_zdataGetInvalidateTime", "(J)J", (void *)&jni_zdata_get_invalidate_time },
     { "jni_zdataGetType", "(J)I", (void *)&jni_zdata_get_type },
     { "jni_zdataGetBoolean", "(J)Z", (void *)&jni_zdata_get_boolean },
     { "jni_zdataGetInteger", "(J)I", (void *)&jni_zdata_get_integer },
