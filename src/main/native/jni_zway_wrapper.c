@@ -164,7 +164,14 @@ static jlong jni_zway_init(JNIEnv *env, jobject obj, jstring name, jstring port,
 }
 
 static void jni_finalize(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong ptr) {
-    free((JZWay)(uintptr_t)ptr);
+    JZWay jzway = (JZWay)(uintptr_t)ptr;
+
+    if (jzway->zway != NULL) {
+        (void)zway_stop(jzway->zway);
+        zway_terminate(&(jzway->zway));
+    }
+
+    free(jzway);
 }
 
 
@@ -182,6 +189,7 @@ static void jni_stop(JNIEnv *env, jobject UNUSED(obj), jlong ptr) {
     JZWay jzway = (JZWay)(uintptr_t)ptr;
 
     ZWError err = zway_stop(jzway->zway);
+    zway_terminate(&(jzway->zway));
 
     if (err != NoError) {
         JNI_THROW_EXCEPTION();
