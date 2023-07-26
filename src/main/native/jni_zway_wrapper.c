@@ -179,7 +179,7 @@ static void jni_discover(JNIEnv *env, jobject UNUSED(obj), jlong ptr) {
 }
 
 static void jni_stop(JNIEnv *env, jobject UNUSED(obj), jlong ptr) {
-    JZWay jzway = (JZWay)ptr;
+    JZWay jzway = (JZWay)(uintptr_t)ptr;
 
     ZWError err = zway_stop(jzway->zway);
 
@@ -189,13 +189,13 @@ static void jni_stop(JNIEnv *env, jobject UNUSED(obj), jlong ptr) {
 }
 
 static jboolean jni_is_idle(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     return (jboolean)zway_is_idle(zway);
 }
 
 static jboolean jni_is_running(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     return (jboolean)zway_is_running(zway);
 }
@@ -395,7 +395,7 @@ static void jni_device_send_nop(JNIEnv *env, jobject UNUSED(obj), jlong jzway, j
     ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     JArg jarg = (JArg)malloc(sizeof(struct JArg));
-    jarg->jzway = (JZWay)jzway;
+    jarg->jzway = (JZWay)(uintptr_t)jzway;
     jarg->arg = (void *)((*env)->NewGlobalRef(env, arg));
 
     ZWError err = zway_device_send_nop(zway, (ZWNODE)node_id, (ZJobCustomCallback) successCallback, (ZJobCustomCallback) failureCallback, (void*)jarg);
@@ -407,13 +407,13 @@ static void jni_device_send_nop(JNIEnv *env, jobject UNUSED(obj), jlong jzway, j
 }
 
 static void jni_device_awake_queue(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway, jint node_id) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     zway_device_awake_queue((const ZWay)zway, (ZWNODE)node_id);
 }
 
 static void jni_device_interview_force(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_device_interview_force((const ZWay)zway, (ZWNODE)device_id);
 
@@ -423,7 +423,7 @@ static void jni_device_interview_force(JNIEnv *env, jobject UNUSED(obj), jlong j
 }
 
 static jboolean jni_device_is_interview_done(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong jzway, jint device_id) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWBOOL ret = zway_device_is_interview_done((const ZWay)zway, (ZWNODE)device_id);
 
@@ -431,7 +431,7 @@ static jboolean jni_device_is_interview_done(JNIEnv *UNUSED(env), jobject UNUSED
 }
 
 static void jni_device_delay_communication(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint delay) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_device_delay_communication(zway, (ZWNODE)device_id, delay);
 
@@ -441,7 +441,7 @@ static void jni_device_delay_communication(JNIEnv *env, jobject UNUSED(obj), jlo
 }
 
 static void jni_device_assign_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint node_id) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_device_assign_return_route((const ZWay)zway, (ZWNODE) device_id, (ZWNODE) node_id);
 
@@ -451,7 +451,7 @@ static void jni_device_assign_return_route(JNIEnv *env, jobject UNUSED(obj), jlo
 }
 
 static void jni_device_assign_priority_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint node_id, jint repeater1, jint repeater2, jint repeater3, jint repeater4) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_device_assign_priority_return_route((const ZWay)zway, (ZWNODE) device_id, (ZWNODE) node_id, (ZWBYTE) repeater1, (ZWBYTE) repeater2, (ZWBYTE) repeater3, (ZWBYTE) repeater4);
 
@@ -461,7 +461,7 @@ static void jni_device_assign_priority_return_route(JNIEnv *env, jobject UNUSED(
 }
 
 static void jni_device_delete_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_device_delete_return_route((const ZWay)zway, (ZWNODE) device_id);
 
@@ -471,7 +471,7 @@ static void jni_device_delete_return_route(JNIEnv *env, jobject UNUSED(obj), jlo
 }
 
 static void jni_device_assign_suc_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_device_assign_suc_return_route((const ZWay)zway, (ZWNODE) device_id);
 
@@ -481,7 +481,7 @@ static void jni_device_assign_suc_return_route(JNIEnv *env, jobject UNUSED(obj),
 }
 
 static void jni_device_assign_priority_suc_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint repeater1, jint repeater2, jint repeater3, jint repeater4) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_device_assign_priority_suc_return_route((const ZWay)zway, (ZWNODE) device_id, (ZWBYTE) repeater1, (ZWBYTE) repeater2, (ZWBYTE) repeater3, (ZWBYTE) repeater4);
 
@@ -491,7 +491,7 @@ static void jni_device_assign_priority_suc_return_route(JNIEnv *env, jobject UNU
 }
 
 static void jni_device_delete_suc_return_route(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_device_delete_suc_return_route((const ZWay)zway, (ZWNODE) device_id);
 
@@ -501,7 +501,7 @@ static void jni_device_delete_suc_return_route(JNIEnv *env, jobject UNUSED(obj),
 }
 
 static void jni_command_interview(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint device_id, jint instance_id, jint cc_id) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zway_command_interview((const ZWay)zway, (ZWNODE) device_id, (ZWBYTE) instance_id, (ZWBYTE) cc_id);
 
@@ -511,7 +511,7 @@ static void jni_command_interview(JNIEnv *env, jobject UNUSED(obj), jlong jzway,
 }
 
 static void jni_zddx_save_to_xml(JNIEnv *env, jobject UNUSED(obj), jlong jzway) {
-    ZWay zway = ((JZWay)jzway)->zway;
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
     ZWError err = zddx_save_to_xml((const ZWay)zway);
 
@@ -706,7 +706,7 @@ static jlongArray jni_zdata_get_children(JNIEnv *env, jobject UNUSED(obj), jlong
 }
 
 static jlong jni_zdata_get_update_time(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     time_t time = zdata_get_update_time(jzdata->dh);
@@ -716,7 +716,7 @@ static jlong jni_zdata_get_update_time(JNIEnv *UNUSED(env), jobject UNUSED(obj),
 }
 
 static jlong jni_zdata_get_invalidate_time(JNIEnv *UNUSED(env), jobject UNUSED(obj), jlong dh) {
-    JZData jzdata = (JZData)dh;
+    JZData jzdata = (JZData)(uintptr_t)dh;
 
     zdata_acquire_lock(ZDataRoot(jzdata->jzway->zway));
     time_t time = zdata_get_invalidate_time(jzdata->dh);
