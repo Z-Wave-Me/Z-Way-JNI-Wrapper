@@ -17,6 +17,8 @@ jobs:
       run: sudo apt-get install python2
     - name: Install Z-Way
       run: wget -qO - https://storage.z-wave.me/Z-Way-Install | sudo bash
+    - name: Check Z-Way version
+      run: test "$(cd /opt/z-way-server && ./z-way-server --version | sed 's/Z-Way version v\([^ ]*\) .*/\1/')" == "$(cat pom.xml | grep version | head -n 1 | sed '0,/<version>/ { s|.*<version>\(.*\)</version>.*|\1| }')"
     - name: Set up Maven Central Repository
       uses: actions/setup-java@v1
       with:
