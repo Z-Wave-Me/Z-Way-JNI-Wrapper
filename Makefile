@@ -75,10 +75,10 @@ clean:
 	python2 $(SCRIPT_DIR)/autogenerate_code.py clean $(ZWAY_ROOT) $(NATIVE_DIR)/jni_zway_wrapper.c $(JAVA_DIR)/ZWay.java
 
 mvn:
-	mvn -Dzway.root=../z-way clean compile package install
+	JAVA_HOME=$(update-alternatives --query javadoc | grep Value: | head -n1 | sed 's/Value: //' | sed 's@bin/javadoc$@@') mvn -Dzway.root=../z-way clean compile package install
 
-deploy: mvn
-	mvn clean deploy -Pci-cd
+deploy:
+	JAVA_HOME=$(update-alternatives --query javadoc | grep Value: | head -n1 | sed 's/Value: //' | sed 's@bin/javadoc$@@') mvn clean deploy -Pci-cd
 
 run:
 	mvn -f example clean package
