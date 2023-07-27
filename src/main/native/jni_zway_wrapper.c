@@ -1163,7 +1163,7 @@ static JNINativeMethod funcs[] = {
     { "jni_deviceSendNOP", "(JILjava/lang/Object;)V", (void *)&jni_device_send_nop },
     { "jni_deviceAwakeQueue", "(JI)V", (void *)&jni_device_awake_queue },
     { "jni_deviceInterviewForce", "(JI)V", (void *)&jni_device_interview_force },
-    { "jni_deviceIsInterviewDone", "(JI)B", (void *)&jni_device_is_interview_done },
+    { "jni_deviceIsInterviewDone", "(JI)Z", (void *)&jni_device_is_interview_done },
     { "jni_deviceDelayCommunication", "(JII)V", (void *)&jni_device_delay_communication },
     { "jni_deviceAssignReturnRoute", "(JII)V", (void *)&jni_device_assign_return_route },
     { "jni_deviceAssignPriorityReturnRoute", "(JIIIIII)V", (void *)&jni_device_assign_priority_return_route },
