@@ -344,4 +344,4 @@ Run the test project:
 - Choose the staging repository to promote.
 - "Close" the staging repository.
 - "Release" the staging repository.
-- Wait for the release to be promoted to https://central.sonatype.com/artifact/me.zwave/zway/ and https://repo.maven.apache.org/maven2/me/zwave/zway/
+- Wait for the release to be promoted to https://central.sonatype.com/artifact/me.zwave/zway/ and https://repo.maven.apache.org/maven2/me/zwave/zway/ (might take up to 2 hours)
