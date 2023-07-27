@@ -49,6 +49,10 @@ else ifeq ($(TARGET_ARCH_NAME),)
 	TARGET_ALL = $(TARGET_SO) $(J_OBJECTS)
 endif
 
+# Java
+
+export JAVA_HOME = $(shell update-alternatives --query javadoc | grep Value: | head -n1 | sed 's/Value: //' | sed 's|bin/javadoc$$||')
+
 ### Targets ###
 
 all: $(TARGET_ALL)
@@ -75,13 +79,13 @@ clean:
 	python2 $(SCRIPT_DIR)/autogenerate_code.py clean $(ZWAY_ROOT) $(NATIVE_DIR)/jni_zway_wrapper.c $(JAVA_DIR)/ZWay.java
 
 mvn:
-	JAVA_HOME=$(update-alternatives --query javadoc | grep Value: | head -n1 | sed 's/Value: //' | sed 's@bin/javadoc$@@') mvn -Dzway.root=../z-way clean compile package install
+	mvn -Dzway.root=../z-way clean compile package install
 
 deploy:
-	JAVA_HOME=$(update-alternatives --query javadoc | grep Value: | head -n1 | sed 's/Value: //' | sed 's@bin/javadoc$@@') mvn clean deploy -Pci-cd
+	mvn clean deploy -Pci-cd
 
-run:
+run: mvn
 	mvn -f example clean package
-	sudo LD_LIBRARY_PATH=$(TARGET_DIR):$(subst  ,:,$(ZWAY_LIB_DIRS)) java -Djava.library.path=$(TARGET_DIR) -cp example/target/z-way-example-4.1.0.jar Main
+	sudo LD_LIBRARY_PATH=$(TARGET_DIR):$(subst  ,:,$(ZWAY_LIB_DIRS)) java -Djava.library.path=$(TARGET_DIR) -classpath example/target/z-way-example-*.jar Main
 
 .PHONY: all prepare clean run
