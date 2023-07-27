@@ -14,7 +14,7 @@ ifeq ($(WITH_JNI),yes)
 	ZWAY_INC_DIRS = ../z-commons ../z-way ../z-way/FunctionClasses ../z-way/CommandClasses ../z-s2
 	ZWAY_LIB_DIRS = ../z-commons ../z-way ../z-s2
 	ZWAY_VERSION = $(shell git -C .. tag | grep 'v[0-9]\.[0-9]\.[0-9]' | tail -n 1 | cut -b 2-)
-else
+else ifeq ($(TARGET_ARCH_NAME),)
 	ZWAY_ROOT = /opt/z-way-server
 	ZWAY_INC_DIRS = $(ZWAY_ROOT)/libzway
 	ZWAY_LIB_DIRS = $(ZWAY_ROOT)/libs
@@ -51,7 +51,9 @@ endif
 
 # Java
 
-export JAVA_HOME = $(shell update-alternatives --query javadoc | grep Value: | head -n1 | sed 's/Value: //' | sed 's|bin/javadoc$$||')
+ifneq ($(ZWAY_ROOT),)
+	export JAVA_HOME = $(shell update-alternatives --query javadoc | grep Value: | head -n1 | sed 's/Value: //' | sed 's|bin/javadoc$$||')
+endif
 
 ### Targets ###
 
@@ -76,7 +78,7 @@ prepare:
 clean:
 	rm -fR src/native/*.o $(TARGET_DIR) $(TARGET_SO)
 	rm -fR $(JAVA_DIR)/*.class $(JAVA_EXAMPLE_DIR)/*.class target example/target hs_err_pid*.log
-	python2 $(SCRIPT_DIR)/autogenerate_code.py clean $(ZWAY_ROOT) $(NATIVE_DIR)/jni_zway_wrapper.c $(JAVA_DIR)/ZWay.java
+	test -z "$(ZWAY_ROOT)" || python2 $(SCRIPT_DIR)/autogenerate_code.py clean $(ZWAY_ROOT) $(NATIVE_DIR)/jni_zway_wrapper.c $(JAVA_DIR)/ZWay.java
 
 mvn:
 	mvn -Dzway.root=../z-way clean compile package install
