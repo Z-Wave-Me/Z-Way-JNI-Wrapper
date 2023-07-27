@@ -331,3 +331,17 @@ Stop Z-Way server (or disable the app using the Z-Wave hardware port) before run
 Run the test project:
 
 `make mvn run`
+
+# Release
+
+- Update the version in pom.xml
+- Update the dependency in example/pom.xml
+- Make a new release with a new tag (both like v4.1.1 or v4.1.1-2 for fixes for same Z-Way version) https://github.com/Z-Wave-Me/Z-Way-JNI-Wrapper/releases/new
+- Wait for the action to complete https://github.com/Z-Wave-Me/Z-Way-JNI-Wrapper/actions
+- Go to https://s01.oss.sonatype.org/
+- Login
+- Go to the Staging Repositories section on the left.
+- Choose the staging repository to promote.
+- "Close" the staging repository.
+- "Release" the staging repository.
+- Wait for the release to be promoted to https://central.sonatype.com/artifact/me.zwave/zway/ and https://repo.maven.apache.org/maven2/me/zwave/zway/
