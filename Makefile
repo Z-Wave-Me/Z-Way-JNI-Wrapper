@@ -75,7 +75,10 @@ clean:
 	python2 $(SCRIPT_DIR)/autogenerate_code.py clean $(ZWAY_ROOT) $(NATIVE_DIR)/jni_zway_wrapper.c $(JAVA_DIR)/ZWay.java
 
 mvn:
-	mvn clean compile package install
+	mvn -Dzway.root=../z-way clean compile package install
+
+deploy: mvn
+	mvn clean deploy -Pci-cd
 
 run:
 	mvn -f example clean package
