@@ -19,6 +19,10 @@ Fix man pages if there is an error:
 sudo mkdir -p /usr/share/man/man1
 ```
 
+## Install Z-Way
+
+Follow the guide at https://z-wave.me/z-way/download-z-way/
+
 ## Download the example file
 
 ```
