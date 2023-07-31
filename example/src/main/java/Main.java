@@ -48,22 +48,22 @@ class Main {
 
     static class DeviceDemo implements ZWay.DeviceCallback {
         public void deviceCallback(Integer type, Integer deviceId, Integer instanceId, Integer commandClassId) {
-            if (type == ZWay.deviceAdded) {
+            if (type == ZWay.EventType.DEVICE_ADDED.code) {
                 System.out.println("Device added " + deviceId);
-            } else if (type == ZWay.deviceRemoved) {
+            } else if (type == ZWay.EventType.DEVICE_REMOVED.code) {
                 System.out.println("Device removed " + deviceId);
-            } else if (type == ZWay.instanceAdded) {
+            } else if (type == ZWay.EventType.INSTANCE_ADDED.code) {
                 System.out.println("Instance added " + deviceId + ":" + instanceId);
-            } else if (type == ZWay.instanceRemoved) {
+            } else if (type == ZWay.EventType.INSTANCE_REMOVED.code) {
                 System.out.println("Instance removed " + deviceId + ":" + instanceId);
-            } else if (type == ZWay.commandAdded) {
+            } else if (type == ZWay.EventType.COMMAND_ADDED.code) {
                 System.out.println("Command Class added " + deviceId + ":" + instanceId + " " + commandClassId);
-            } else if (type == ZWay.commandRemoved) {
+            } else if (type == ZWay.EventType.COMMAND_REMOVED.code) {
                 System.out.println("Command Class removed " + deviceId + ":" + instanceId + " " + commandClassId);
             }
 
             // subscribe to switchBinary.data.level
-            if (type == zway.commandAdded && commandClassId == ZWay.commandClassIdByName.get("switchBinary")) {
+            if (type == ZWay.EventType.COMMAND_ADDED.code && commandClassId == ZWay.commandClassIdByName.get("switchBinary")) {
                 try {
                     ((ZWay.Device.Instance.SwitchBinary) zway.devices.get(deviceId).instances.get(instanceId).commandClassesByName.get("switchBinary")).data.get("level").bind(new Demo());
                 } catch (ZWay.Data.NotFound e) {
