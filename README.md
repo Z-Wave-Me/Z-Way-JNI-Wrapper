@@ -24,22 +24,19 @@ try {
 }
 ```
 
-`new ZWay` loads the library and initialize required strutures. This call expects the following arguments:
+`new ZWay` loads the library and initialize required structures. This call expects the following arguments:
 - Name of the instance (for logging purpose, any string can be used).
 - Path to the Z-Wave hardware port.
-- Baud rate (in most cases it is 115200, but for large networks you might want to switch your hardware to a faster speed).
+- Baud rate (in most cases it is 115200, but for large networks, you might want to switch your hardware to a faster speed).
 - Path to the configuration file where all interview information is saved. You can use the same folder as z-way-server is using to be able to run z-way-server and your app (but only one at a time!).
 - Path to translation files (shipped with Z-Way).
 - Path to the ZDDX database files (shipped with Z-Way). You can point to an empty folder to skip using this database (only old non-Z-Wave Plus devices require this database for proper operation).
 
-`zway.discover()` start communications with the Z-Wave hardware. After this call the library will be notified about new events and creation/removal of devices/instances/Command Classes using callback functions.
+`zway.discover()` start communications with the Z-Wave hardware. After this call, the library will be notified about new events and creation/removal of devices/instances/Command Classes using callback functions.
 
-This call is syncronous.
+This call is synchronous.
 
 ## Devices/Instances/CommandClasses add/removal callback
-
-static class DeviceDemo implements ZWay.DeviceCallback {
-    public void deviceCallback(Integer type, Integer deviceId, Integer instanceId, Integer commandClassId) {
 
 Subscribing to device/instance/Command Class add/remove event:
 ```
@@ -68,7 +65,7 @@ zway.unbind(myCbk);
 
 ## Termination callback
 
-Termination callback when Z-Way is terminated by user call or by port disconnect (for example, USB disconnection).
+Termination callback when Z-Way is terminated by user call or on port disconnect (for example, USB disconnection).
 
 You can catch this event using:
 ```
@@ -97,7 +94,7 @@ zway.controller.removeNodeFromNetwork(true); // Remove node
 
 Those functions are asynchronous and will return immediately.
 
-Z-Way thread will stop if the hardware is removed (port has gone) or stop() was called. To check if the Z-Way thread is running, use:
+Z-Way thread will stop if the hardware is removed (port has gone) or stop() is called. To check if the Z-Way thread is running, use:
 ```
 zway.isRunning(); // returns true if Z-Wave is running or false when Z-Way has stopped
 ```
@@ -203,7 +200,7 @@ switchBinary.get(callbackArg);
 switchBinary.set(s, 0, callbackArg);
 ```
 
-Those functions are asynchronous and will return immediately. A callback will be called once the command was transmitted to the target devic.
+Those functions are asynchronous and will return immediately. A callback will be called once the command was transmitted to the target device.
 
 The full list of methods is listed in the manual [Z-Way manual](https://z-wave.me/manual/z-way/Command_Class_Reference.html).
 
@@ -221,13 +218,13 @@ zway.setPriorityRoute(nodeId, repeater1, repeater2, repeater3, repeater4, route_
 zway.setGetLongRangeChannel(channel, callbackArg);
 ```
 
-Those functions are asynchronous and will return immediately. A callback will be called once the command was transmitted to the target devic.
+Those functions are asynchronous and will return immediately. A callback will be called once the command was transmitted to the target device.
 
 The full list of methods is listed in the manual [Z-Way manual](https://z-wave.me/manual/z-way/Function_Class_Reference.html).
 
 ## Command Class and Function Class status callbacks
 
-Command Class method and Function Class calls are asyncronous. It is possible to get notified upon the execution of the command. For this subscribe to the ZWay.StatusCallback and pass an additional parameter to the call (any primitive or object).
+Command Class method and Function Class calls are asynchronous. It is possible to get notified upon the execution of the command. For this subscribe to the ZWay.StatusCallback and pass an additional parameter to the call (any primitive or object).
 
 Upon the execution (successful or non-successful) the statusCallback callback will be called with the boolean result argument and the object passed during the original call.
 
@@ -264,13 +261,13 @@ Note that for Set and Get commands the callback will be called on delivery confi
 
 ## Cleanup
 
-Memory is cleaned with a finalizer on garbage colleaction of each ZWay.Data object.
+Memory is cleaned with a finalizer on garbage collection of each ZWay.Data object.
 
 To stop Z-Way library, use `zway.stop()` and `zway.terminate()` functions.
 
 # Dependency
 
-This library can be built from sources (see *Building* section below) or added via Maven dependecies.
+This library can be built from sources (see *Building* section below) or added via Maven dependencies.
 
 ## Maven
 
@@ -322,12 +319,26 @@ Install Maven
 
 ### Running your or test project
 
-*Only one software at time can speak with the Z-WAve hardware port!*
+*Only one software at a time can speak with the Z-WAve hardware port!*
 
-Stop Z-Way server (or disable the app using the Z-Wave hardware port) before running your app:
+Stop the Z-Way server (or disable the app using the Z-Wave hardware port) before running your app:
 
 `sudo /etc/init.d/z-way-server stop`
 
 Run the test project:
 
 `make mvn run`
+
+# Release
+
+- Update the version in pom.xml
+- Update the dependency in example/pom.xml
+- Make a new release with a new tag (both like v4.1.1 or v4.1.1-2 for fixes for the same Z-Way version) https://github.com/Z-Wave-Me/Z-Way-JNI-Wrapper/releases/new
+- Wait for the action to complete https://github.com/Z-Wave-Me/Z-Way-JNI-Wrapper/actions
+- Go to https://s01.oss.sonatype.org/
+- Login
+- Go to the Staging Repositories section on the left.
+- Choose the staging repository to promote.
+- "Close" the staging repository.
+- "Release" the staging repository.
+- Wait for the release to be promoted to https://central.sonatype.com/artifact/me.zwave/zway/ and https://repo.maven.apache.org/maven2/me/zwave/zway/ (might take up to 2 hours)

@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>me.z-wave.z-way</groupId>
+  <groupId>me.zwave</groupId>
   <artifactId>z-way-example</artifactId>
-  <version>4.1.0</version>
+  <version>4.1.1</version>
   <name>Z-Way Example for Z-Way library Java wrapper</name>
   <description>Example of usage of Z-Wave.Me Z-Way library</description>
 
@@ -46,9 +46,9 @@
   
   <dependencies>
     <dependency>
-      <groupId>me.z-wave.z-way</groupId>
-      <artifactId>z-way</artifactId>
-      <version>4.1.0</version>
+      <groupId>me.zwave</groupId>
+      <artifactId>zway</artifactId>
+      <version>4.1.1-2</version>
     </dependency>
   </dependencies>
 
