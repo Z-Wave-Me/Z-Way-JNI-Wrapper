@@ -37,7 +37,7 @@ class Main {
 
     static class Demo implements ZWay.DataCallback {
         public void dataCallback(ZWay.Data data, Integer type) {
-            if (type == ZWay.Data.deleted) return;
+            if (type == ZWay.DataEventType.DELETED.code) return;
             try {
                 System.out.println(data.path + " = " + data.getBool() + " (type = " + type + ")"); 
             } catch (ZWay.Data.NotAlive e) {

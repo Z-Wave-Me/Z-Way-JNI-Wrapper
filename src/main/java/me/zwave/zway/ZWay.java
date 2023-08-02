@@ -8,6 +8,21 @@ import java.util.Map;
 import java.util.Set;
 
 public final class ZWay {
+    public enum DataEventType {
+        UPDATED        (0x01),
+        INVALIDATED    (0x02),
+        DELETED        (0X03),
+        CHILD_CREATED  (0X04),
+        PHANTOM_UPDATE (0X40),
+        CHILD_EVENT    (0X80);
+
+        public final int code;
+
+        DataEventType(int code) {
+            this.code = code;
+        }
+    }
+
     public enum EventType {
         DEVICE_ADDED     (0x01),
         DEVICE_REMOVED   (0x02),
@@ -19,6 +34,24 @@ public final class ZWay {
         public final int code;
 
         EventType(int code) {
+            this.code = code;
+        }
+    }
+
+    public enum DataType {
+        EMPTY        (0),
+        BOOL         (1),
+        INT          (2),
+        FLOAT        (3 ),
+        STRING       (4),
+        BINARY       (5),
+        INT_ARRAY    (6),
+        FLOAT_ARRAY  (7),
+        STRING_ARRAY (8);
+
+        public final int code;
+
+        DataType(int code) {
             this.code = code;
         }
     }
@@ -257,24 +290,9 @@ public final class ZWay {
     public interface TerminateCallback {
         public void terminateCallback();
     }
-    
+
     public final class Data {
-        public static final int phantomUpdate = 0x40;
-        public static final int childEvent = 0x80;
-        public static final int updated = 0x01;
-        public static final int invalidated = 0x02;
-        public static final int deleted = 0x03;
-        public static final int childCreated = 0x04;
-        
-        public static final int Empty = 0;
-        public static final int Bool = 1;
-        public static final int Int = 2;
-        public static final int Float = 3;
-        public static final int String = 4;
-        public static final int Binary = 5;
-        public static final int IntArray = 6;
-        public static final int FloatArray = 7;
-        public static final int StringArray = 8;
+
 
         private Object value;
         private Type valueType;
@@ -379,16 +397,16 @@ public final class ZWay {
 
         private void dataCallback(int type) throws Exception {
             // get type of the event
-            boolean isPhantom = (phantomUpdate & type) > 0;
-            boolean isChild = (childEvent & type) > 0;
-            type = type & (~phantomUpdate) & (~childEvent);
-            if (type == updated) {
+            boolean isPhantom = (DataEventType.PHANTOM_UPDATE.code & type) > 0;
+            boolean isChild = (DataEventType.CHILD_EVENT.code & type) > 0;
+            type = type & (~DataEventType.PHANTOM_UPDATE.code) & (~DataEventType.CHILD_EVENT.code);
+            if (type == DataEventType.UPDATED.code) {
                 getValue();
-            } else if (type == invalidated) {
+            } else if (type == DataEventType.INVALIDATED.code) {
                 jni_zdataGetInvalidateTime(dh);
-            } else if (type == deleted) {
+            } else if (type == DataEventType.DELETED.code) {
                 isAlive = false;
-            } else if (type == childCreated) {
+            } else if (type == DataEventType.CHILD_CREATED.code) {
                 // nothing to do
             } else {
                 throw new Exception("Type of the event is an invalid integer.");
@@ -405,33 +423,33 @@ public final class ZWay {
 
         private void getValue() throws Exception {
             int dataType = jni_zdataGetType(dh);
-            if (dataType == Bool) {
+            if (dataType == DataType.BOOL.code) {
                 valueType = Boolean.class;
                 valueTypeStr = "Boolean";
                 value = jni_zdataGetBoolean(dh);
-            } else if (dataType == Int) {
+            } else if (dataType == DataType.INT.code) {
                 valueType = Integer.class;
                 valueTypeStr = "Integer";
                 value = jni_zdataGetInteger(dh);
-            } else if (dataType == Float) {
+            } else if (dataType == DataType.FLOAT.code) {
                 valueType = Float.class;
                 valueTypeStr = "Float";
                 value = jni_zdataGetFloat(dh);
-            } else if (dataType == String) {
+            } else if (dataType == DataType.STRING.code) {
                 valueType = String.class;
                 valueTypeStr = "String";
                 value = jni_zdataGetString(dh);
-            } else if (dataType == Binary) {
+            } else if (dataType == DataType.BINARY.code) {
                 valueType = Byte[].class;
                 valueTypeStr = "Byte[]";
                 int[] val = jni_zdataGetBinary(dh);
                 value = Arrays.stream(val).boxed().toArray( Integer[]::new );
-            } else if (dataType == IntArray) {
+            } else if (dataType == DataType.INT_ARRAY.code) {
                 valueType = Integer[].class;
                 valueTypeStr = "Integer[]";
                 int[] val = jni_zdataGetIntArray(dh);
                 value = Arrays.stream(val).boxed().toArray( Integer[]::new );
-            } else if (dataType == FloatArray) {
+            } else if (dataType == DataType.FLOAT_ARRAY.code) {
                 valueType = Float[].class;
                 valueTypeStr = "Float[]";
                 float[] val = jni_zdataGetFloatArray(dh);
@@ -441,11 +459,11 @@ public final class ZWay {
                     newValue[i] = val[i];
                 }
                 value = newValue;
-            } else if (dataType == StringArray) {
+            } else if (dataType == DataType.STRING_ARRAY.code) {
                 valueType = String[].class;
                 valueTypeStr = "String[]";
                 value = jni_zdataGetStringArray(dh);
-            } else if (dataType == Empty) {
+            } else if (dataType == DataType.EMPTY.code) {
                 valueType = Object.class;
                 valueTypeStr = "Null";
                 value = null;
