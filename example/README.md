@@ -25,6 +25,12 @@ git clone https://github.com/Z-Wave-Me/Z-Way-JNI-Wrapper
 cd Z-Way-JNI-Wrapper/example/
 ```
 
+Checkout to the latest release version listed here: https://github.com/Z-Wave-Me/Z-Way-JNI-Wrapper/releases/latest
+
+```
+git checkout $(wget https://github.com/Z-Wave-Me/Z-Way-JNI-Wrapper/releases/latest --max-redirect 0 2>&1 | grep Location | awk '{print $2}' | awk -F/ '{ print $NF }')
+```
+
 ## Define the Z-Wave port
 
 If required, change the port in src/main/java/Main.java
