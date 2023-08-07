@@ -4,7 +4,7 @@
   <groupId>me.zwave</groupId>
   <artifactId>zway</artifactId>
   <packaging>jar</packaging>
-  <version>4.1.1-2</version>
+  <version>4.1.1-3</version>
   <name>Z-Way library Java wrapper</name>
   <description>Java wrapper for Z-Wave.Me Z-Way library</description>
   <url>https://z-wave.me/z-way/api</url>
