@@ -329,6 +329,18 @@ Run the test project:
 
 `make mvn run`
 
+### Building and running without Maven
+
+It is also possible to run the example project without Maven:
+
+`
+make clean all
+cd example/src/main/java
+cp ../../../../src/main/java/me . -R
+javac Main.java
+sudo LD_LIBRARY_PATH=/opt/z-way-server/libs /usr/bin/java -Djava.library.path=../../../../libjzway/ Main
+`
+
 # Release
 
 - Update the version in pom.xml
