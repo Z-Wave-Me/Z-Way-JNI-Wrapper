@@ -704,6 +704,10 @@ public final class ZWay {
             jni_removeNodeFromNetwork(jzway, startStop);
         }
 
+        public void removeFailedNode(int nodeId) {
+            jni_removeFailedNode(jzway, nodeId);
+        }
+
         public void change(boolean startStop) {
             jni_controllerChange(jzway, startStop);
         }

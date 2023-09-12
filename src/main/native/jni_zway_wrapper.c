@@ -228,6 +228,16 @@ static void jni_remove_node_from_network(JNIEnv *env, jobject UNUSED(obj), jlong
     }
 }
 
+static void jni_remove_failed_node(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jint node_id) {
+    ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
+
+    ZWError err = zway_controller_remove_failed_node(zway, node_id);
+
+    if (err != NoError) {
+        JNI_THROW_EXCEPTION();
+    }
+}
+
 static void jni_controller_change(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jboolean startStop) {
     ZWay zway = ((JZWay)(uintptr_t)jzway)->zway;
 
@@ -1157,6 +1167,7 @@ static JNINativeMethod funcs[] = {
     { "jni_isIdle", "(J)Z", (void *)&jni_is_idle },
     { "jni_addNodeToNetwork", "(JZ)V", (void *)&jni_add_node_to_network },
     { "jni_removeNodeFromNetwork", "(JZ)V", (void *)&jni_remove_node_from_network },
+    { "jni_removeFailedNode", "(JI)V", (void *)&jni_remove_failed_node },
     { "jni_controllerChange", "(JZ)V", (void *)&jni_controller_change },
     { "jni_setSUCNodeId", "(JI)V", (void *)&jni_set_suc_node_id },
     { "jni_setSISNodeId", "(JI)V", (void *)&jni_set_sis_node_id },
