@@ -3,7 +3,8 @@ TARGET = libjzway
 TARGET_DIR = $(TARGET)
 TARGET_SO = $(TARGET_DIR)/$(TARGET).so
 
-JAVA_DIR = src/main/java/me/zwave/zway
+DOMAIN = me/zwave/zway
+JAVA_DIR = src/main/java/$(DOMAIN)
 JAVA_EXAMPLE_DIR = example/src/main/java/
 SCRIPT_DIR = src/main/scripts
 NATIVE_DIR = src/main/native
@@ -76,8 +77,8 @@ prepare:
 	mkdir -p $(TARGET)
 	
 clean:
-	rm -fR src/native/*.o $(TARGET_DIR) $(TARGET_SO)
-	rm -fR $(JAVA_DIR)/*.class $(JAVA_EXAMPLE_DIR)/*.class target example/target hs_err_pid*.log
+	rm -fR $(NATIVE_DIR)/*.o $(TARGET_DIR) $(TARGET_SO)
+	rm -fR $(JAVA_DIR)/*.class $(JAVA_EXAMPLE_DIR)/$(DOMAIN)/*.class target example/target hs_err_pid*.log
 	test -z "$(ZWAY_ROOT)" || python2 $(SCRIPT_DIR)/autogenerate_code.py clean $(ZWAY_ROOT) $(NATIVE_DIR)/jni_zway_wrapper.c $(JAVA_DIR)/ZWay.java
 
 mvn:
