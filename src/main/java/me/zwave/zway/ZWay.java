@@ -223,6 +223,7 @@ public final class ZWay {
     private native boolean jni_isRunning(long ptr);
     private native void jni_addNodeToNetwork(long ptr, boolean startStop);
     private native void jni_removeNodeFromNetwork(long ptr, boolean startStop);
+    private native void jni_removeFailedNode(long ptr, int nodeId);
     private native void jni_controllerChange(long ptr, boolean startStop);
     private native void jni_setSUCNodeId(long ptr, int nodeId);
     private native void jni_setSISNodeId(long ptr, int nodeId);
