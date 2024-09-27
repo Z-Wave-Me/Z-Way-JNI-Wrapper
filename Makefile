@@ -25,7 +25,7 @@ endif
 ZWAY_LIBS = zway zs2 zcommons
 
 # JNI
-JNI_ROOT ?= /usr/lib/jvm/java-8-openjdk-amd64
+JNI_ROOT ?= $(shell update-alternatives --query javadoc | grep Value: | head -n1 | sed 's/Value: //' | sed 's|bin/javadoc$$||')
 JNI_INCLUDES = -I$(JNI_ROOT)/include/ -I$(JNI_ROOT)/include/linux
 
 C_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(NATIVE_DIR)/*.c))
@@ -52,9 +52,7 @@ endif
 
 # Java
 
-ifneq ($(ZWAY_ROOT),)
-	export JAVA_HOME = $(shell update-alternatives --query javadoc | grep Value: | head -n1 | sed 's/Value: //' | sed 's|bin/javadoc$$||')
-endif
+export JAVA_HOME ?= $(JNI_ROOT)
 
 ### Targets ###
 

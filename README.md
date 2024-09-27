@@ -297,6 +297,10 @@ Produce JNI library:
 
 You might need to specify the path to the jni folder:
 
+`make clean all`
+
+It is also possible to explicitly specify the JDK folder:
+
 `JNI_ROOT=/usr/lib/jvm/java-8-openjdk-armhf make clean all`
 
 ### Building the JAR package
