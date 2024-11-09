@@ -334,15 +334,15 @@ static void jni_request_network_update(JNIEnv *env, jobject UNUSED(obj), jlong j
 
     if (err != NoError) {
        JNI_THROW_EXCEPTION();
-   }
+    }
 
-   if (suc_node_id != 0 && node_id != suc_node_id) {
-        ZWError err = zway_controller_set_default(zway);
+    if (suc_node_id != 0 && node_id != suc_node_id) {
+        ZWError err = zway_fc_request_network_update(zway, NULL, NULL, NULL);
 
         if (err != NoError) {
             JNI_THROW_EXCEPTION();
         }
-   }
+    }
 }
 
 static void jni_set_learn_mode(JNIEnv *env, jobject UNUSED(obj), jlong jzway, jboolean startStop) {
