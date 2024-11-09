@@ -459,8 +459,8 @@ def GenerateCodeFCLine(template):
                                 .replace("%params_java_declarations%", "".join(map(GetParamJavaDeclaration, filter(IsParamNotLength, fc.params))))
                                 .replace("%params_java_declarations_no_comma%", "".join(map(GetParamJavaDeclaration, filter(IsParamNotLength, fc.params)))[:-2])
                                 .replace("%params_signature%", "".join(map(GetParamSignature, filter(IsParamNotLength, fc.params))))
-                                .replace("%params_parser%", "".join(map(GetParamParser, filter(IsParamNotLength, fc.params))))
-                                .replace("%params_parser_release%", "".join(map(GetParamParserRelease, filter(IsParamNotLength, fc.params))))
+                                .replace("%params_jni_parser%", "".join(map(GetParamParser, filter(IsParamNotLength, fc.params))))
+                                .replace("%params_jni_parser_release%", "".join(map(GetParamParserRelease, filter(IsParamNotLength, fc.params))))
                         )
         
         return code
@@ -487,8 +487,8 @@ def GenerateCodeCCLine(line, cc, cmd = None):
                 .replace("%params_java_declarations%", "".join(map(GetParamJavaDeclaration, filter(IsParamNotLength, cmd.params))))
                 .replace("%params_java_declarations_no_comma%", "".join(map(GetParamJavaDeclaration, filter(IsParamNotLength, cmd.params)))[:-2])
                 .replace("%params_signature%", "".join(map(GetParamSignature, filter(IsParamNotLength, cmd.params))))
-                .replace("%params_parser%", "".join(map(GetParamParser, filter(IsParamNotLength, cmd.params))))
-                .replace("%params_parser_release%", "".join(map(GetParamParserRelease, filter(IsParamNotLength, cmd.params))))
+                .replace("%params_jni_parser%", "".join(map(GetParamParser, filter(IsParamNotLength, cmd.params))))
+                .replace("%params_jni_parser_release%", "".join(map(GetParamParserRelease, filter(IsParamNotLength, cmd.params))))
         )
         
         return line
